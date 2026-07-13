@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Camera, MessageCircle, Heart } from "lucide-react";
+import { Camera, MessageCircle, Bookmark } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/auth/user-menu";
@@ -11,13 +11,23 @@ export async function NavHeader() {
   } = await supabase.auth.getUser();
 
   let fullName: string | null = null;
+  let photographerHref: string | null = null;
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("full_name")
+      .select("full_name, is_photographer")
       .eq("id", user.id)
       .single();
     fullName = profile?.full_name ?? null;
+
+    if (profile?.is_photographer) {
+      const { data: photographerProfile } = await supabase
+        .from("photographer_profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      photographerHref = photographerProfile ? "/dashboard/profile" : "/onboarding";
+    }
   }
 
   return (
@@ -29,23 +39,27 @@ export async function NavHeader() {
         </Link>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
+          <Link
+            href="/messages"
             aria-label="Messages"
             className="rounded-full p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
           >
             <MessageCircle className="size-5" />
-          </button>
-          <button
-            type="button"
+          </Link>
+          <Link
+            href="/saved"
             aria-label="Saved photographers"
             className="rounded-full p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
           >
-            <Heart className="size-5" />
-          </button>
+            <Bookmark className="size-5" />
+          </Link>
 
           {user ? (
-            <UserMenu fullName={fullName} email={user.email ?? ""} />
+            <UserMenu
+              fullName={fullName}
+              email={user.email ?? ""}
+              photographerHref={photographerHref}
+            />
           ) : (
             <div className="flex items-center gap-2 pl-2">
               <Button

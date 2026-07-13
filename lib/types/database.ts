@@ -39,6 +39,84 @@ export type Database = {
   }
   public: {
     Tables: {
+      conversations: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          photographer_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          photographer_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          photographer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_photographer_id_fkey"
+            columns: ["photographer_id"]
+            isOneToOne: false
+            referencedRelation: "photographer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          read_at: string | null
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       photographer_profiles: {
         Row: {
           available_this_month: boolean
@@ -177,6 +255,42 @@ export type Database = {
           location?: string | null
         }
         Relationships: []
+      }
+      saved_photographers: {
+        Row: {
+          created_at: string
+          id: string
+          photographer_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          photographer_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          photographer_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_photographers_photographer_id_fkey"
+            columns: ["photographer_id"]
+            isOneToOne: false
+            referencedRelation: "photographer_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_photographers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       specialties: {
         Row: {
@@ -345,3 +459,7 @@ export type Specialty = Tables<"specialties">;
 export type PortfolioItem = Omit<Tables<"portfolio_items">, "type"> & {
   type: "photo" | "video";
 };
+
+export type SavedPhotographer = Tables<"saved_photographers">;
+export type Conversation = Tables<"conversations">;
+export type Message = Tables<"messages">;

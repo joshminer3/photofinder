@@ -3,8 +3,7 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import type { Specialty } from "@/lib/types/database";
 
-export const MAX_PHOTOS = 30;
-export const MAX_VIDEOS = 5;
+export { MAX_PHOTOS, MAX_VIDEOS } from "@/lib/portfolio";
 export const TOTAL_STEPS = 5;
 
 export type PortfolioDraftItem = {

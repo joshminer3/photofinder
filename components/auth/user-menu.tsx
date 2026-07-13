@@ -15,9 +15,11 @@ import {
 export function UserMenu({
   fullName,
   email,
+  photographerHref,
 }: {
   fullName: string | null;
   email: string;
+  photographerHref: string | null;
 }) {
   const router = useRouter();
   const initials = (fullName ?? email).slice(0, 1).toUpperCase();
@@ -42,10 +44,12 @@ export function UserMenu({
           <span className="text-xs text-muted-foreground">{email}</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem render={<a href="/onboarding" />}>
-          <User className="size-4" />
-          Photographer profile
-        </DropdownMenuItem>
+        {photographerHref && (
+          <DropdownMenuItem render={<a href={photographerHref} />}>
+            <User className="size-4" />
+            Photographer profile
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onClick={handleLogout} variant="destructive">
           <LogOut className="size-4" />
           Log out

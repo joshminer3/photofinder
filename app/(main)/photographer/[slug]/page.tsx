@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { MessageButton } from "@/components/photographer/message-button";
+import { SaveButton } from "@/components/photographer/save-button";
 import {
   PortfolioGrid,
   type PortfolioMedia,
@@ -71,6 +72,22 @@ export default async function PhotographerProfilePage({
   if (!result) notFound();
 
   const { photographer, media } = result;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let initialSaved = false;
+  if (user) {
+    const { data: savedRow } = await supabase
+      .from("saved_photographers")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("photographer_id", photographer.id)
+      .maybeSingle();
+    initialSaved = Boolean(savedRow);
+  }
+
   const profile = photographer.profiles;
   const name = profile?.full_name ?? "Photographer";
   const coverPhoto = media.find((m) => m.type === "photo");
@@ -114,6 +131,12 @@ export default async function PhotographerProfilePage({
               </Badge>
             </div>
           </div>
+          <SaveButton
+            photographerId={photographer.id}
+            slug={slug}
+            isLoggedIn={Boolean(user)}
+            initialSaved={initialSaved}
+          />
         </div>
 
         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
@@ -139,7 +162,11 @@ export default async function PhotographerProfilePage({
         )}
 
         <div className="flex flex-col gap-3 rounded-lg border p-4">
-          <MessageButton />
+          <MessageButton
+            photographerId={photographer.id}
+            slug={slug}
+            isLoggedIn={Boolean(user)}
+          />
           <div className="flex flex-wrap gap-4 text-sm">
             {photographer.public_email && (
               <a
