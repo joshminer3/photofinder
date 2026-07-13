@@ -118,6 +118,14 @@ export function StepReview() {
         if (itemsError) throw itemsError;
       }
 
+      // Best-effort — a failed admin notification shouldn't block the
+      // photographer from seeing their submission succeeded.
+      fetch("/api/notify-submission", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photographerId: photographerProfile.id }),
+      }).catch((err) => console.error("Failed to notify admin:", err));
+
       setSlug(newSlug);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
