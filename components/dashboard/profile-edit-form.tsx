@@ -179,6 +179,11 @@ export function ProfileEditForm({
           other_link_label: data.otherLinkLabel || null,
           public_email: data.publicEmail || null,
           public_phone: data.publicPhone || null,
+          // A previously-rejected photographer resubmits by editing and
+          // saving — clear the rejection so they re-enter the pending queue.
+          // Suspensions are left untouched; those require admin action.
+          rejected_at: null,
+          rejection_reason: null,
         })
         .eq("id", photographerId);
       if (photographerError) throw photographerError;

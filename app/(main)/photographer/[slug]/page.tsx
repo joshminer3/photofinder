@@ -11,6 +11,10 @@ import {
   PortfolioGrid,
   type PortfolioMedia,
 } from "@/components/photographer/portfolio-grid";
+import { ReviewsSection, type ReviewWithReviewer } from "@/components/reviews/reviews-section";
+import { ReportModal } from "@/components/reports/report-modal";
+
+const REVIEWS_PAGE_SIZE = 5;
 
 async function getPhotographer(slug: string) {
   const supabase = await createClient();
@@ -87,6 +91,32 @@ export default async function PhotographerProfilePage({
       .maybeSingle();
     initialSaved = Boolean(savedRow);
   }
+
+  const [{ data: allRatings }, { data: firstReviews }] = await Promise.all([
+    supabase.from("reviews").select("rating").eq("photographer_id", photographer.id),
+    supabase
+      .from("reviews")
+      .select("id, rating, content, created_at, reviewer_id, profiles(full_name, avatar_url)")
+      .eq("photographer_id", photographer.id)
+      .order("created_at", { ascending: false })
+      .range(0, REVIEWS_PAGE_SIZE - 1),
+  ]);
+
+  const reviewCount = allRatings?.length ?? 0;
+  const avgRating =
+    reviewCount > 0
+      ? (allRatings ?? []).reduce((sum, r) => sum + r.rating, 0) / reviewCount
+      : 0;
+
+  const reviews: ReviewWithReviewer[] = (firstReviews ?? []).map((r) => ({
+    id: r.id,
+    rating: r.rating,
+    content: r.content,
+    created_at: r.created_at,
+    reviewer_id: r.reviewer_id,
+    reviewer_name: r.profiles?.full_name ?? "Anonymous",
+    reviewer_avatar_url: r.profiles?.avatar_url ?? null,
+  }));
 
   const profile = photographer.profiles;
   const name = profile?.full_name ?? "Photographer";
@@ -237,6 +267,20 @@ export default async function PhotographerProfilePage({
               {s}
             </Badge>
           ))}
+        </div>
+
+        <ReviewsSection
+          photographerId={photographer.id}
+          photographerName={name}
+          reviews={reviews}
+          totalCount={reviewCount}
+          avgRating={avgRating}
+          currentUserId={user?.id ?? null}
+          isOwnProfile={user?.id === photographer.user_id}
+        />
+
+        <div className="pt-2">
+          <ReportModal photographerId={photographer.id} photographerName={name} />
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getRatingsByPhotographerId } from "@/lib/reviews";
 import { FilterPanel } from "@/components/search/FilterPanel";
 import { SearchResults } from "@/components/search/SearchResults";
 import type { SearchPhotographer } from "@/components/search/PhotographerCard";
@@ -32,7 +33,7 @@ export default async function SearchPage({
   let query = supabase
     .from("photographer_profiles")
     .select(
-      "slug, primary_specialty, service_area, price_range_min, price_range_max, available_this_month, bio, profiles!inner(full_name, avatar_url, is_approved, is_photographer)",
+      "id, slug, primary_specialty, service_area, price_range_min, price_range_max, available_this_month, bio, profiles!inner(full_name, avatar_url, is_approved, is_photographer)",
     )
     .eq("profiles.is_approved", true)
     .eq("profiles.is_photographer", true)
@@ -47,6 +48,7 @@ export default async function SearchPage({
   if (available) query = query.eq("available_this_month", true);
 
   const { data: results } = await query;
+  const ratings = await getRatingsByPhotographerId((results ?? []).map((r) => r.id));
 
   const photographers: SearchPhotographer[] = (results ?? []).map((r) => ({
     slug: r.slug,
@@ -58,6 +60,8 @@ export default async function SearchPage({
     bio: r.bio,
     full_name: r.profiles?.full_name ?? "Photographer",
     avatar_url: r.profiles?.avatar_url ?? null,
+    avgRating: ratings.get(r.id)?.avgRating,
+    reviewCount: ratings.get(r.id)?.reviewCount,
   }));
 
   return (

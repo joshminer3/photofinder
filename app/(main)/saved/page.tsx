@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getRatingsByPhotographerId } from "@/lib/reviews";
 import type { SearchPhotographer } from "@/components/search/PhotographerCard";
 import { SearchResults } from "@/components/search/SearchResults";
 
@@ -16,25 +17,30 @@ export default async function SavedPage() {
   const { data: saved } = await supabase
     .from("saved_photographers")
     .select(
-      "photographer_profiles(slug, primary_specialty, service_area, price_range_min, price_range_max, available_this_month, bio, profiles(full_name, avatar_url))",
+      "photographer_profiles(id, slug, primary_specialty, service_area, price_range_min, price_range_max, available_this_month, bio, profiles(full_name, avatar_url))",
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
-  const photographers: SearchPhotographer[] = (saved ?? [])
+  const savedPhotographers = (saved ?? [])
     .map((row) => row.photographer_profiles)
-    .filter((p): p is NonNullable<typeof p> => Boolean(p))
-    .map((p) => ({
-      slug: p.slug,
-      primary_specialty: p.primary_specialty,
-      service_area: p.service_area,
-      price_range_min: p.price_range_min,
-      price_range_max: p.price_range_max,
-      available_this_month: p.available_this_month,
-      bio: p.bio,
-      full_name: p.profiles?.full_name ?? "Photographer",
-      avatar_url: p.profiles?.avatar_url ?? null,
-    }));
+    .filter((p): p is NonNullable<typeof p> => Boolean(p));
+
+  const ratings = await getRatingsByPhotographerId(savedPhotographers.map((p) => p.id));
+
+  const photographers: SearchPhotographer[] = savedPhotographers.map((p) => ({
+    slug: p.slug,
+    primary_specialty: p.primary_specialty,
+    service_area: p.service_area,
+    price_range_min: p.price_range_min,
+    price_range_max: p.price_range_max,
+    available_this_month: p.available_this_month,
+    bio: p.bio,
+    full_name: p.profiles?.full_name ?? "Photographer",
+    avatar_url: p.profiles?.avatar_url ?? null,
+    avgRating: ratings.get(p.id)?.avgRating,
+    reviewCount: ratings.get(p.id)?.reviewCount,
+  }));
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8">

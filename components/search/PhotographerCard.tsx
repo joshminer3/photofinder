@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,8 @@ export type SearchPhotographer = {
   bio: string | null;
   full_name: string;
   avatar_url: string | null;
+  avgRating?: number;
+  reviewCount?: number;
 };
 
 export function PhotographerCard({
@@ -46,9 +49,15 @@ export function PhotographerCard({
             <p className="font-semibold leading-tight">
               {photographer.full_name}
             </p>
-            <Badge variant="secondary" className="mt-1">
-              {photographer.primary_specialty}
-            </Badge>
+            <div className="mt-1 flex items-center gap-2">
+              <Badge variant="secondary">{photographer.primary_specialty}</Badge>
+              {Boolean(photographer.reviewCount) && (
+                <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
+                  <Star className="size-3 fill-current text-yellow-500" />
+                  {photographer.avgRating?.toFixed(1)} ({photographer.reviewCount})
+                </span>
+              )}
+            </div>
           </div>
         </div>
 

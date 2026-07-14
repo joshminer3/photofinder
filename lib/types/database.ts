@@ -131,10 +131,13 @@ export type Database = {
           primary_specialty: string
           public_email: string | null
           public_phone: string | null
+          rejected_at: string | null
+          rejection_reason: string | null
           secondary_specialty_1: string | null
           secondary_specialty_2: string | null
           service_area: string | null
           slug: string
+          suspended_at: string | null
           updated_at: string
           user_id: string
           website_url: string | null
@@ -152,10 +155,13 @@ export type Database = {
           primary_specialty: string
           public_email?: string | null
           public_phone?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
           secondary_specialty_1?: string | null
           secondary_specialty_2?: string | null
           service_area?: string | null
           slug: string
+          suspended_at?: string | null
           updated_at?: string
           user_id: string
           website_url?: string | null
@@ -173,10 +179,13 @@ export type Database = {
           primary_specialty?: string
           public_email?: string | null
           public_phone?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
           secondary_specialty_1?: string | null
           secondary_specialty_2?: string | null
           service_area?: string | null
           slug?: string
+          suspended_at?: string | null
           updated_at?: string
           user_id?: string
           website_url?: string | null
@@ -232,8 +241,10 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          is_admin: boolean
           is_approved: boolean
           is_photographer: boolean
+          is_suspended: boolean
           location: string | null
         }
         Insert: {
@@ -241,8 +252,10 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          is_admin?: boolean
           is_approved?: boolean
           is_photographer?: boolean
+          is_suspended?: boolean
           location?: string | null
         }
         Update: {
@@ -250,11 +263,103 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          is_admin?: boolean
           is_approved?: boolean
           is_photographer?: boolean
+          is_suspended?: boolean
           location?: string | null
         }
         Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          photographer_id: string
+          reason: string
+          reporter_id: string | null
+          resolved_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          photographer_id: string
+          reason: string
+          reporter_id?: string | null
+          resolved_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          photographer_id?: string
+          reason?: string
+          reporter_id?: string | null
+          resolved_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_photographer_id_fkey"
+            columns: ["photographer_id"]
+            isOneToOne: false
+            referencedRelation: "photographer_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          photographer_id: string
+          rating: number
+          reviewer_id: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          photographer_id: string
+          rating: number
+          reviewer_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          photographer_id?: string
+          rating?: number
+          reviewer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_photographer_id_fkey"
+            columns: ["photographer_id"]
+            isOneToOne: false
+            referencedRelation: "photographer_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       saved_photographers: {
         Row: {
@@ -463,3 +568,5 @@ export type PortfolioItem = Omit<Tables<"portfolio_items">, "type"> & {
 export type SavedPhotographer = Tables<"saved_photographers">;
 export type Conversation = Tables<"conversations">;
 export type Message = Tables<"messages">;
+export type Review = Tables<"reviews">;
+export type Report = Tables<"reports">;
