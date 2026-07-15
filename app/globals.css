@@ -49,6 +49,16 @@
 }
 
 :root {
+  /* Foto brand tokens — homepage only. Namespaced so they never override
+     the shadcn theme tokens (--background, --border, etc.) used globally. */
+  --brand-bg-page: #fdfcfb;
+  --brand-bg-card: #ffffff;
+  --brand-border: #e6e2dd;
+  --brand-text-primary: #111010;
+  --brand-text-mid: #4c4845;
+  --brand-text-muted: #7a7572;
+  --brand-text-light: #b8b3ae;
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);

@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Camera, MessageCircle, Bookmark } from "lucide-react";
+import { MessageCircle, Bookmark } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/auth/user-menu";
+import { LogoMark } from "@/components/logo-mark";
 
 export async function NavHeader() {
   const supabase = await createClient();
@@ -31,10 +32,20 @@ export async function NavHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header
+      className="sticky top-0 z-40 border-b backdrop-blur"
+      style={{
+        backgroundColor: "color-mix(in oklab, var(--brand-bg-page) 95%, transparent)",
+        borderColor: "var(--brand-border)",
+      }}
+    >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2 font-semibold text-lg">
-          <Camera className="size-5" />
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-lg font-bold -tracking-[0.5px]"
+          style={{ color: "var(--brand-text-primary)" }}
+        >
+          <LogoMark className="size-6" />
           Foto
         </Link>
 
@@ -42,14 +53,16 @@ export async function NavHeader() {
           <Link
             href="/messages"
             aria-label="Messages"
-            className="rounded-full p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="rounded-full p-2 hover:bg-black/5"
+            style={{ color: "var(--brand-text-muted)" }}
           >
             <MessageCircle className="size-5" />
           </Link>
           <Link
             href="/saved"
             aria-label="Saved photographers"
-            className="rounded-full p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="rounded-full p-2 hover:bg-black/5"
+            style={{ color: "var(--brand-text-muted)" }}
           >
             <Bookmark className="size-5" />
           </Link>
@@ -66,10 +79,20 @@ export async function NavHeader() {
                 variant="ghost"
                 render={<Link href="/login" />}
                 nativeButton={false}
+                className="hover:bg-black/5"
+                style={{ color: "var(--brand-text-primary)" }}
               >
                 Log in
               </Button>
-              <Button render={<Link href="/signup" />} nativeButton={false}>
+              <Button
+                render={<Link href="/signup" />}
+                nativeButton={false}
+                className="rounded-[6px] border-none hover:opacity-90"
+                style={{
+                  backgroundColor: "var(--brand-text-primary)",
+                  color: "var(--brand-bg-page)",
+                }}
+              >
                 Sign up
               </Button>
             </div>
