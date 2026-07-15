@@ -63,9 +63,20 @@ export function ReviewModal({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <Button onClick={() => setOpen(true)} variant="outline">
-        {existingReview ? "Edit your review" : "Leave a Review"}
-      </Button>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="shrink-0 rounded-[6px] border bg-white"
+        style={{
+          height: "26px",
+          borderColor: "#E6E2DD",
+          color: "#111010",
+          fontSize: "11px",
+          padding: "0 10px",
+        }}
+      >
+        {existingReview ? "Edit your review" : "Leave a review"}
+      </button>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Rate your experience with {photographerName}</DialogTitle>

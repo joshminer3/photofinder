@@ -1,8 +1,5 @@
-"use client";
-
-import { useState } from "react";
 import Image from "next/image";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Play } from "lucide-react";
 
 export type PortfolioMedia = {
   id: string;
@@ -11,65 +8,50 @@ export type PortfolioMedia = {
 };
 
 export function PortfolioGrid({ items }: { items: PortfolioMedia[] }) {
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const photos = items.filter((i) => i.type === "photo");
+  const photos = items.filter((i) => i.type === "photo").slice(0, 30);
   const videos = items.filter((i) => i.type === "video");
 
   if (items.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {photos.map((item, index) => (
-          <button
+    <div className="flex flex-col" style={{ gap: "6px" }}>
+      <div className="grid grid-cols-3" style={{ gap: "6px" }}>
+        {photos.map((item) => (
+          <div
             key={item.id}
-            type="button"
-            onClick={() => setLightboxIndex(index)}
-            className="relative aspect-square overflow-hidden rounded-lg bg-muted"
+            className="relative overflow-hidden"
+            style={{ aspectRatio: "1", borderRadius: "6px", background: "#E6E2DD" }}
           >
             <Image
               src={item.url}
               alt=""
               fill
-              sizes="(max-width: 640px) 50vw, 33vw"
-              className="object-cover transition-transform hover:scale-105"
-            />
-          </button>
-        ))}
-        {videos.map((item) => (
-          <div
-            key={item.id}
-            className="relative aspect-square overflow-hidden rounded-lg bg-black"
-          >
-            <video
-              src={item.url}
-              controls
-              playsInline
-              className="size-full object-cover"
+              sizes="(max-width: 640px) 33vw, 240px"
+              className="object-cover"
             />
           </div>
         ))}
       </div>
 
-      <Dialog
-        open={lightboxIndex !== null}
-        onOpenChange={(open) => !open && setLightboxIndex(null)}
-      >
-        <DialogContent className="max-w-3xl border-none bg-transparent p-0 shadow-none">
-          <DialogTitle className="sr-only">Portfolio photo</DialogTitle>
-          {lightboxIndex !== null && (
-            <div className="relative aspect-square w-full">
-              <Image
-                src={photos[lightboxIndex].url}
-                alt=""
-                fill
-                sizes="100vw"
-                className="rounded-lg object-contain"
-              />
+      {videos.map((item) => (
+        <div
+          key={item.id}
+          className="relative overflow-hidden"
+          style={{ aspectRatio: "16/9", borderRadius: "6px", background: "#000000" }}
+        >
+          <video src={item.url} controls playsInline className="size-full object-cover" />
+          <div
+            className="pointer-events-none absolute inset-0 flex items-center justify-center"
+          >
+            <div
+              className="flex items-center justify-center rounded-full"
+              style={{ width: "40px", height: "40px", background: "rgba(255,255,255,0.85)" }}
+            >
+              <Play size={18} color="#111010" fill="#111010" />
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

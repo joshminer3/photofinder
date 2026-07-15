@@ -75,7 +75,8 @@ export function ReportModal({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-xs text-muted-foreground underline hover:text-foreground"
+        style={{ fontSize: "12px", color: "#B8B3AE" }}
+        className="hover:text-foreground"
       >
         Report this profile
       </button>

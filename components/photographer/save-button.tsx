@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Bookmark } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
 
 export function SaveButton({
   photographerId,
@@ -63,15 +62,23 @@ export function SaveButton({
   }
 
   return (
-    <Button
-      variant="outline"
-      size="icon"
+    <button
+      type="button"
       onClick={handleClick}
       disabled={pending}
       aria-label={saved ? "Remove from saved" : "Save photographer"}
       aria-pressed={saved}
+      className="absolute flex items-center justify-center rounded-[8px] border-none"
+      style={{
+        top: "12px",
+        right: "12px",
+        width: "32px",
+        height: "32px",
+        background: "rgba(255,255,255,0.92)",
+        zIndex: 2,
+      }}
     >
-      <Bookmark className={saved ? "fill-current" : undefined} />
-    </Button>
+      <Bookmark size={16} color="#111010" className={saved ? "fill-current" : undefined} />
+    </button>
   );
 }
