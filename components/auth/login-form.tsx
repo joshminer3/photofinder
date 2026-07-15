@@ -2,28 +2,31 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { AuthCard, AuthCardTitle, AuthCardSubtitle } from "@/components/auth/auth-card";
+import { Field } from "@/components/auth/field";
+import { GoogleButton } from "@/components/auth/google-button";
+import { OrDivider } from "@/components/auth/or-divider";
+import { SwitchLine } from "@/components/auth/switch-line";
+
+type Mode = "login" | "forgot";
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/";
+
+  const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -37,7 +40,9 @@ export function LoginForm() {
     });
 
     if (signInError) {
-      setError(signInError.message);
+      // Deliberately generic — don't reveal whether the email or the
+      // password was the wrong part.
+      setError("Incorrect email or password.");
       setLoading(false);
       return;
     }
@@ -62,58 +67,157 @@ export function LoginForm() {
     }
   }
 
+  async function handleResetSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setResetLoading(true);
+    setResetError(null);
+
+    const supabase = createClient();
+    const { error: resetErr } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    if (resetErr) {
+      setResetError(resetErr.message);
+      setResetLoading(false);
+      return;
+    }
+
+    setResetSent(true);
+    setResetLoading(false);
+  }
+
+  function backToLogin() {
+    setMode("login");
+    setResetSent(false);
+    setResetError(null);
+  }
+
+  if (mode === "forgot") {
+    return (
+      <AuthCard>
+        <AuthCardTitle>Reset your password</AuthCardTitle>
+
+        {resetSent ? (
+          <p style={{ fontSize: "13px", color: "#4C4845", marginBottom: "18px" }}>
+            Check your email for a reset link.
+          </p>
+        ) : (
+          <>
+            <AuthCardSubtitle>Enter your email and we&apos;ll send a reset link.</AuthCardSubtitle>
+            <form onSubmit={handleResetSubmit}>
+              <Field
+                label="Email"
+                type="email"
+                placeholder="you@email.com"
+                autoComplete="email"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+              />
+
+              {resetError && (
+                <p style={{ fontSize: "12px", color: "#E24B4A", textAlign: "center", marginBottom: "10px" }}>
+                  {resetError}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={resetLoading || !resetEmail}
+                className="w-full disabled:cursor-not-allowed"
+                style={{
+                  height: "42px",
+                  background: resetLoading || !resetEmail ? "#E6E2DD" : "#111010",
+                  color: resetLoading || !resetEmail ? "#B8B3AE" : "#FDFCFB",
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                }}
+              >
+                {resetLoading ? "Sending..." : "Send reset link"}
+              </button>
+            </form>
+          </>
+        )}
+
+        <button
+          type="button"
+          onClick={backToLogin}
+          className="flex items-center"
+          style={{ gap: "4px", fontSize: "12px", color: "#7A7572", marginTop: "16px" }}
+        >
+          <ArrowLeft size={13} />
+          Back to log in
+        </button>
+      </AuthCard>
+    );
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Log in</CardTitle>
-        <CardDescription>Welcome back to Foto.</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-5">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+    <AuthCard>
+      <AuthCardTitle>Log in</AuthCardTitle>
+      <AuthCardSubtitle>Welcome back to Foto.</AuthCardSubtitle>
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
+      <form onSubmit={handleSubmit}>
+        <Field
+          label="Email"
+          type="email"
+          placeholder="you@email.com"
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <Field
+          label="Password"
+          type="password"
+          placeholder="Your password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-          <Button type="submit" disabled={loading}>
-            {loading ? "Logging in..." : "Log in"}
-          </Button>
-        </form>
+        <button
+          type="button"
+          onClick={() => setMode("forgot")}
+          className="block"
+          style={{
+            marginLeft: "auto",
+            marginTop: "-8px",
+            marginBottom: "14px",
+            fontSize: "11px",
+            color: "#7A7572",
+            textDecoration: "underline",
+          }}
+        >
+          Forgot password?
+        </button>
 
-        <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-border" />
-          <span className="text-xs text-muted-foreground">OR</span>
-          <div className="h-px flex-1 bg-border" />
-        </div>
+        {error && (
+          <p style={{ fontSize: "12px", color: "#E24B4A", textAlign: "center", marginBottom: "10px" }}>
+            {error}
+          </p>
+        )}
 
-        <Button variant="outline" onClick={handleGoogle} disabled={loading}>
-          Continue with Google
-        </Button>
-      </CardContent>
-      <CardFooter className="justify-center text-sm text-muted-foreground">
-        Don&apos;t have an account?&nbsp;
-        <Link href="/signup" className="font-medium text-foreground underline">
-          Sign up
-        </Link>
-      </CardFooter>
-    </Card>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full disabled:cursor-not-allowed"
+          style={{
+            height: "42px",
+            background: loading ? "#E6E2DD" : "#111010",
+            color: loading ? "#B8B3AE" : "#FDFCFB",
+            borderRadius: "6px",
+            fontSize: "14px",
+            fontWeight: 500,
+          }}
+        >
+          {loading ? "Logging in..." : "Log in"}
+        </button>
+      </form>
+
+      <OrDivider />
+      <GoogleButton onClick={handleGoogle} disabled={loading} />
+      <SwitchLine prompt="Don't have an account?" linkText="Sign up" href="/signup" />
+    </AuthCard>
   );
 }

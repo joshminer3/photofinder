@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Camera } from "lucide-react";
+import { LogoMark } from "@/components/logo-mark";
 
 export default function AuthLayout({
   children,
@@ -7,12 +7,23 @@ export default function AuthLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-8 px-4 py-12">
-      <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
-        <Camera className="size-5" />
-        Foto
+    <div
+      className="flex min-h-screen flex-col items-center"
+      style={{ background: "#FDFCFB", padding: "40px 24px 60px" }}
+    >
+      <Link
+        href="/"
+        className="flex items-center"
+        style={{ color: "#111010", marginBottom: "28px" }}
+      >
+        <LogoMark className="size-[22px]" />
+        <span style={{ fontSize: "18px", fontWeight: 700, letterSpacing: "-0.5px", marginLeft: "8px" }}>
+          Foto
+        </span>
       </Link>
-      <div className="w-full max-w-sm">{children}</div>
+      <div className="w-full" style={{ maxWidth: "420px" }}>
+        {children}
+      </div>
     </div>
   );
 }
