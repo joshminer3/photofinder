@@ -34,42 +34,58 @@ export function OnboardingFlow() {
   })();
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-8 px-4 py-10">
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>
-            Step {step} of {TOTAL_STEPS}
-          </span>
-          <span>{STEP_LABELS[step - 1]}</span>
+    <div className="onboarding-page min-h-[calc(100vh-4rem)]">
+      <div className="mx-auto flex max-w-xl flex-col gap-8 px-4 py-10">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <span>
+              Step {step} of {TOTAL_STEPS}
+            </span>
+            <span style={{ color: "#7A7572" }}>{STEP_LABELS[step - 1]}</span>
+          </div>
+          <Progress value={(step / TOTAL_STEPS) * 100} />
         </div>
-        <Progress value={(step / TOTAL_STEPS) * 100} />
+
+        {step === 1 && <StepBasics />}
+        {step === 2 && <StepSpecialty />}
+        {step === 3 && <StepPortfolio />}
+        {step === 4 && <StepLinks />}
+        {step === 5 && <StepReview />}
+
+        {step < 5 && (
+          <div className="flex justify-between">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={step === 1}
+              onClick={() => setStep(step - 1)}
+              className="h-[42px]"
+              style={{
+                background: "transparent",
+                border: "0.5px solid #E6E2DD",
+                borderRadius: "6px",
+                color: "#4C4845",
+              }}
+            >
+              Back
+            </Button>
+            <Button
+              type="button"
+              disabled={!isCurrentStepValid}
+              onClick={() => setStep(step + 1)}
+              className="h-[42px]"
+              style={{
+                background: "#111010",
+                color: "#FDFCFB",
+                borderRadius: "6px",
+                fontWeight: 500,
+              }}
+            >
+              Next
+            </Button>
+          </div>
+        )}
       </div>
-
-      {step === 1 && <StepBasics />}
-      {step === 2 && <StepSpecialty />}
-      {step === 3 && <StepPortfolio />}
-      {step === 4 && <StepLinks />}
-      {step === 5 && <StepReview />}
-
-      {step < 5 && (
-        <div className="flex justify-between">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={step === 1}
-            onClick={() => setStep(step - 1)}
-          >
-            Back
-          </Button>
-          <Button
-            type="button"
-            disabled={!isCurrentStepValid}
-            onClick={() => setStep(step + 1)}
-          >
-            Next
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

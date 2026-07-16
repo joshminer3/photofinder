@@ -69,7 +69,7 @@ export function StepBasics() {
           onChange={(e) => update({ bio: e.target.value })}
           placeholder="Tell clients what makes your work unique..."
         />
-        <span className="self-end text-xs text-muted-foreground">
+        <span className="self-end text-xs" style={{ color: "#B8B3AE" }}>
           {data.bio.length}/{BIO_MAX}
         </span>
       </div>

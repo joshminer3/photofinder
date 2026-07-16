@@ -138,3 +138,28 @@
     @apply font-sans;
   }
 }
+
+/* Onboarding page — Foto brand tokens, scoped to .onboarding-page so the
+   shared Input/Textarea components used elsewhere in the app are untouched. */
+.onboarding-page {
+  background: #fdfcfb;
+}
+
+.onboarding-page input,
+.onboarding-page textarea {
+  border: 0.5px solid #e6e2dd;
+  background: #ffffff;
+}
+
+.onboarding-page input:focus,
+.onboarding-page input:focus-visible,
+.onboarding-page textarea:focus,
+.onboarding-page textarea:focus-visible {
+  border-color: #b8b3ae;
+  outline: none;
+  box-shadow: none;
+}
+
+.onboarding-page textarea {
+  resize: none;
+}

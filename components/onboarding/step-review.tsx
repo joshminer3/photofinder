@@ -184,9 +184,13 @@ export function StepReview() {
         <Row
           label="Price range"
           value={
-            data.priceMin || data.priceMax
-              ? `$${data.priceMin || "?"} – $${data.priceMax || "?"}`
-              : "—"
+            data.priceMin && data.priceMax
+              ? `$${data.priceMin} – $${data.priceMax}`
+              : data.priceMin
+                ? `From $${data.priceMin}`
+                : data.priceMax
+                  ? `Up to $${data.priceMax}`
+                  : "—"
           }
         />
         <Row
@@ -216,7 +220,7 @@ export function StepReview() {
         </div>
       )}
 
-      <Button onClick={handleSubmit} disabled={submitting} size="lg">
+      <Button onClick={handleSubmit} disabled={submitting} size="lg" className="w-full">
         {submitting ? "Submitting..." : "Submit for approval"}
       </Button>
     </div>
