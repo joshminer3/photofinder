@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { ProfileEditForm } from "@/components/dashboard/profile-edit-form";
+import { ViewProfileButton } from "@/components/dashboard/view-profile-button";
 
 export default async function DashboardProfilePage() {
   const supabase = await createClient();
@@ -41,32 +42,45 @@ export default async function DashboardProfilePage() {
   }));
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold">Edit your profile</h1>
-      <ProfileEditForm
-        userId={user.id}
-        photographerId={photographer.id}
-        specialties={specialties ?? []}
-        initialData={{
-          fullName: profile?.full_name ?? "",
-          avatarUrl: profile?.avatar_url ?? null,
-          bio: photographer.bio ?? "",
-          serviceArea: photographer.service_area ?? "",
-          primarySpecialty: photographer.primary_specialty,
-          secondarySpecialty1: photographer.secondary_specialty_1 ?? "",
-          secondarySpecialty2: photographer.secondary_specialty_2 ?? "",
-          priceMin: photographer.price_range_min?.toString() ?? "",
-          priceMax: photographer.price_range_max?.toString() ?? "",
-          availableThisMonth: photographer.available_this_month,
-          instagramUrl: photographer.instagram_url ?? "",
-          websiteUrl: photographer.website_url ?? "",
-          otherLinkUrl: photographer.other_link_url ?? "",
-          otherLinkLabel: photographer.other_link_label ?? "",
-          publicEmail: photographer.public_email ?? "",
-          publicPhone: photographer.public_phone ?? "",
-          portfolioItems,
-        }}
-      />
+    <div style={{ padding: "24px" }}>
+      <div className="flex items-center justify-between" style={{ marginBottom: "20px" }}>
+        <div>
+          <h1 style={{ fontSize: "18px", fontWeight: 500, color: "#111010", letterSpacing: "-0.5px" }}>
+            Edit your profile
+          </h1>
+          <p style={{ fontSize: "12px", color: "#7A7572", marginTop: "2px" }}>
+            Changes save immediately when you click Save changes.
+          </p>
+        </div>
+        <ViewProfileButton slug={photographer.slug} />
+      </div>
+
+      <div className="max-w-2xl">
+        <ProfileEditForm
+          userId={user.id}
+          photographerId={photographer.id}
+          specialties={specialties ?? []}
+          initialData={{
+            fullName: profile?.full_name ?? "",
+            avatarUrl: profile?.avatar_url ?? null,
+            bio: photographer.bio ?? "",
+            serviceArea: photographer.service_area ?? "",
+            primarySpecialty: photographer.primary_specialty,
+            secondarySpecialty1: photographer.secondary_specialty_1 ?? "",
+            secondarySpecialty2: photographer.secondary_specialty_2 ?? "",
+            priceMin: photographer.price_range_min?.toString() ?? "",
+            priceMax: photographer.price_range_max?.toString() ?? "",
+            availableThisMonth: photographer.available_this_month,
+            instagramUrl: photographer.instagram_url ?? "",
+            websiteUrl: photographer.website_url ?? "",
+            otherLinkUrl: photographer.other_link_url ?? "",
+            otherLinkLabel: photographer.other_link_label ?? "",
+            publicEmail: photographer.public_email ?? "",
+            publicPhone: photographer.public_phone ?? "",
+            portfolioItems,
+          }}
+        />
+      </div>
     </div>
   );
 }

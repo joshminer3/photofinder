@@ -246,7 +246,7 @@ export function ProfileEditForm({
     <div className="flex flex-col gap-8">
       {/* Section 1: Basics */}
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">Basics</h2>
+        <h2 className="dashboard-section-heading">Basics</h2>
         <div className="flex items-center gap-4">
           <Avatar className="size-16">
             <AvatarImage src={avatarPreview ?? undefined} />
@@ -300,7 +300,7 @@ export function ProfileEditForm({
 
       {/* Section 2: Specialty & Pricing */}
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">Specialty &amp; pricing</h2>
+        <h2 className="dashboard-section-heading">Specialty &amp; pricing</h2>
         <div className="flex flex-col gap-2">
           <Label>Primary specialty</Label>
           <Select
@@ -412,7 +412,7 @@ export function ProfileEditForm({
 
       {/* Section 3: Portfolio */}
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">Portfolio</h2>
+        <h2 className="dashboard-section-heading">Portfolio</h2>
         <p className="text-sm text-muted-foreground">
           {photoCount}/{MAX_PHOTOS} photos, {videoCount}/{MAX_VIDEOS} videos
         </p>
@@ -486,7 +486,7 @@ export function ProfileEditForm({
 
       {/* Section 4: Links & Contact */}
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">Links &amp; contact</h2>
+        <h2 className="dashboard-section-heading">Links &amp; contact</h2>
         <div className="flex flex-col gap-2">
           <Label htmlFor="instagram">Instagram URL</Label>
           <Input
@@ -541,7 +541,19 @@ export function ProfileEditForm({
         </div>
       </section>
 
-      <Button onClick={handleSave} disabled={saving} size="lg">
+      <Button
+        onClick={handleSave}
+        disabled={saving}
+        size="lg"
+        className="w-full h-[42px]"
+        style={{
+          background: "#111010",
+          color: "#FDFCFB",
+          borderRadius: "6px",
+          fontSize: "14px",
+          fontWeight: 500,
+        }}
+      >
         {saving ? "Saving..." : "Save changes"}
       </Button>
     </div>
