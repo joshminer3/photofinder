@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MessageCircle, Bookmark } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { hasUnreadMessages } from "@/lib/messages/get-unread-status";
 import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/auth/user-menu";
 import { LogoMark } from "@/components/logo-mark";
@@ -13,22 +14,23 @@ export async function NavHeader() {
 
   let fullName: string | null = null;
   let photographerHref: string | null = null;
+  let hasUnread = false;
   if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("full_name, is_photographer")
-      .eq("id", user.id)
-      .single();
+    const [{ data: profile }, { data: photographerProfile }] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("full_name, is_photographer")
+        .eq("id", user.id)
+        .single(),
+      supabase.from("photographer_profiles").select("id").eq("user_id", user.id).maybeSingle(),
+    ]);
     fullName = profile?.full_name ?? null;
 
     if (profile?.is_photographer) {
-      const { data: photographerProfile } = await supabase
-        .from("photographer_profiles")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
       photographerHref = photographerProfile ? "/dashboard/profile" : "/onboarding";
     }
+
+    hasUnread = await hasUnreadMessages(user.id, photographerProfile?.id ?? null);
   }
 
   return (
@@ -52,11 +54,24 @@ export async function NavHeader() {
         <div className="flex items-center gap-2">
           <Link
             href="/messages"
-            aria-label="Messages"
-            className="rounded-full p-2 hover:bg-black/5"
+            aria-label={hasUnread ? "Messages (unread)" : "Messages"}
+            className="relative rounded-full p-2 hover:bg-black/5"
             style={{ color: "var(--brand-text-muted)" }}
           >
             <MessageCircle className="size-5" />
+            {hasUnread && (
+              <span
+                className="absolute rounded-full"
+                style={{
+                  top: "6px",
+                  right: "6px",
+                  width: "8px",
+                  height: "8px",
+                  background: "#111010",
+                  border: "2px solid var(--brand-bg-page)",
+                }}
+              />
+            )}
           </Link>
           <Link
             href="/saved"
