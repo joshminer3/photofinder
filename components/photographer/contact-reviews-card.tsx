@@ -1,6 +1,7 @@
 import { Mail, Phone } from "lucide-react";
 import { MessageButton } from "@/components/photographer/message-button";
 import { ReviewsColumn, type ReviewWithReviewer } from "@/components/reviews/reviews-column";
+import { ReviewModal } from "@/components/reviews/review-modal";
 
 function ContactRow({
   icon,
@@ -54,6 +55,8 @@ export function ContactReviewsCard({
 }) {
   const hasReviews = totalCount > 0;
   const hasContact = Boolean(email || phone);
+  const canReview = Boolean(currentUserId) && !isOwnProfile && !hasExistingReview;
+  const showReviewsSide = hasReviews || canReview;
 
   return (
     <div
@@ -66,7 +69,7 @@ export function ContactReviewsCard({
       }}
     >
       <div
-        className={hasReviews ? "grid grid-cols-1 sm:grid-cols-2" : "grid grid-cols-1"}
+        className={showReviewsSide ? "grid grid-cols-1 sm:grid-cols-2" : "grid grid-cols-1"}
         style={{ gap: "24px" }}
       >
         <div>
@@ -111,7 +114,7 @@ export function ContactReviewsCard({
           )}
         </div>
 
-        {hasReviews && (
+        {hasReviews ? (
           <ReviewsColumn
             photographerId={photographerId}
             photographerName={photographerName}
@@ -122,6 +125,28 @@ export function ContactReviewsCard({
             isOwnProfile={isOwnProfile}
             hasExistingReview={hasExistingReview}
           />
+        ) : (
+          canReview && (
+            <div>
+              <div
+                style={{
+                  fontSize: "10px",
+                  fontWeight: 500,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  color: "#7A7572",
+                  marginBottom: "12px",
+                }}
+              >
+                Reviews
+              </div>
+              <ReviewModal
+                photographerId={photographerId}
+                photographerName={photographerName}
+                existingReview={null}
+              />
+            </div>
+          )
         )}
       </div>
     </div>
