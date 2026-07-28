@@ -43,17 +43,19 @@ export default async function SavedPage() {
   }));
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8">
-      <h1 className="text-2xl font-bold">Saved photographers</h1>
-      {photographers.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-12 text-center text-muted-foreground">
-          No saved photographers yet.
-          <br />
-          Browse photographers and save the ones you like.
-        </div>
-      ) : (
-        <SearchResults photographers={photographers} />
-      )}
+    <div style={{ background: "#FDFCFB" }} className="min-h-[calc(100vh-4rem)]">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8">
+        <h1 className="text-2xl font-bold">Saved photographers</h1>
+        {photographers.length === 0 ? (
+          <div className="rounded-lg border border-dashed p-12 text-center text-muted-foreground">
+            No saved photographers yet.
+            <br />
+            Browse photographers and save the ones you like.
+          </div>
+        ) : (
+          <SearchResults photographers={photographers} />
+        )}
+      </div>
     </div>
   );
 }

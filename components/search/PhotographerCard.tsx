@@ -19,15 +19,26 @@ export type SearchPhotographer = {
   reviewCount?: number;
 };
 
+function capitalizeLocation(location: string): string {
+  return location
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
 export function PhotographerCard({
   photographer,
 }: {
   photographer: SearchPhotographer;
 }) {
   const priceLabel =
-    photographer.price_range_min || photographer.price_range_max
-      ? `$${photographer.price_range_min ?? "?"}–$${photographer.price_range_max ?? "?"}`
-      : null;
+    photographer.price_range_min && photographer.price_range_max
+      ? `$${photographer.price_range_min}–$${photographer.price_range_max}`
+      : photographer.price_range_min
+        ? `From $${photographer.price_range_min}`
+        : photographer.price_range_max
+          ? `Up to $${photographer.price_range_max}`
+          : null;
 
   const bioSnippet = photographer.bio
     ? photographer.bio.length > 100
@@ -62,7 +73,9 @@ export function PhotographerCard({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          {photographer.service_area && <span>{photographer.service_area}</span>}
+          {photographer.service_area && (
+            <span>{capitalizeLocation(photographer.service_area)}</span>
+          )}
           {priceLabel && (
             <>
               <span>·</span>
@@ -72,7 +85,9 @@ export function PhotographerCard({
         </div>
 
         {photographer.available_this_month && (
-          <Badge className="w-fit">Available this month</Badge>
+          <Badge className="w-fit" style={{ background: "#F0EFED", color: "#4C4845" }}>
+            Available this month
+          </Badge>
         )}
 
         {bioSnippet && (
