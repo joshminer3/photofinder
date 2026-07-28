@@ -34,6 +34,19 @@ export async function POST(request: Request) {
     );
   }
 
+  // Check for an existing conversation first so a returning client doesn't
+  // get a duplicate thread every time they click "Send a message".
+  const { data: existing } = await supabase
+    .from("conversations")
+    .select("id")
+    .eq("client_id", user.id)
+    .eq("photographer_id", photographerId)
+    .maybeSingle();
+
+  if (existing) {
+    return NextResponse.json({ conversationId: existing.id });
+  }
+
   const { data: inserted, error: insertError } = await supabase
     .from("conversations")
     .insert({ client_id: user.id, photographer_id: photographerId })
@@ -48,16 +61,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Failed to start conversation" }, { status: 500 });
   }
 
-  const { data: existing, error: fetchError } = await supabase
+  // Defensive fallback: two concurrent requests can both pass the check
+  // above before either insert commits. The unique constraint on
+  // (client_id, photographer_id) catches that race here.
+  const { data: raceWinner, error: fetchError } = await supabase
     .from("conversations")
     .select("id")
     .eq("client_id", user.id)
     .eq("photographer_id", photographerId)
     .single();
 
-  if (fetchError || !existing) {
+  if (fetchError || !raceWinner) {
     return NextResponse.json({ error: "Failed to start conversation" }, { status: 500 });
   }
 
-  return NextResponse.json({ conversationId: existing.id });
+  return NextResponse.json({ conversationId: raceWinner.id });
 }
