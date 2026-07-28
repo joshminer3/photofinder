@@ -19,6 +19,7 @@ export type OnboardingData = {
   avatarPreviewUrl: string | null;
   bio: string;
   serviceArea: string;
+  state: string;
   primarySpecialty: string;
   secondarySpecialty1: string;
   secondarySpecialty2: string;
@@ -65,6 +66,7 @@ export function OnboardingProvider({
     avatarPreviewUrl: initialAvatarUrl,
     bio: "",
     serviceArea: "",
+    state: "",
     primarySpecialty: "",
     secondarySpecialty1: "",
     secondarySpecialty2: "",

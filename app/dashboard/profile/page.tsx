@@ -65,6 +65,7 @@ export default async function DashboardProfilePage() {
             avatarUrl: profile?.avatar_url ?? null,
             bio: photographer.bio ?? "",
             serviceArea: photographer.service_area ?? "",
+            state: photographer.state ?? "",
             primarySpecialty: photographer.primary_specialty,
             secondarySpecialty1: photographer.secondary_specialty_1 ?? "",
             secondarySpecialty2: photographer.secondary_specialty_2 ?? "",

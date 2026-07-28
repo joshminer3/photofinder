@@ -14,14 +14,14 @@ export default async function SearchPage({
   const params = await searchParams;
   const specialtySlug =
     typeof params.specialty === "string" ? params.specialty : undefined;
-  const location = typeof params.location === "string" ? params.location : undefined;
+  const state = typeof params.state === "string" ? params.state : undefined;
   const priceMin =
     typeof params.price_min === "string" ? Number(params.price_min) : undefined;
   const priceMax =
     typeof params.price_max === "string" ? Number(params.price_max) : undefined;
   const available = params.available === "true";
   const sort = typeof params.sort === "string" ? params.sort : "newest";
-  const hasAnyFilter = Boolean(specialtySlug || location || priceMin || priceMax || available);
+  const hasAnyFilter = Boolean(specialtySlug || state || priceMin || priceMax || available);
 
   const supabase = await createClient();
 
@@ -44,7 +44,7 @@ export default async function SearchPage({
     .order("created_at", { ascending: false });
 
   if (specialtyName) query = query.eq("primary_specialty", specialtyName);
-  if (location) query = query.ilike("service_area", `%${location}%`);
+  if (state) query = query.eq("state", state);
   if (priceMax !== undefined && !Number.isNaN(priceMax))
     query = query.lte("price_range_min", priceMax);
   if (priceMin !== undefined && !Number.isNaN(priceMin))

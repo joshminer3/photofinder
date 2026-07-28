@@ -85,6 +85,7 @@ export function StepReview() {
           secondary_specialty_1: data.secondarySpecialty1 || null,
           secondary_specialty_2: data.secondarySpecialty2 || null,
           service_area: data.serviceArea || null,
+          state: data.state || null,
           price_range_min: data.priceMin ? Number(data.priceMin) : null,
           price_range_max: data.priceMax ? Number(data.priceMax) : null,
           instagram_url: data.instagramUrl || null,
@@ -170,6 +171,7 @@ export function StepReview() {
       <div className="flex flex-col gap-4 rounded-lg border p-4 text-sm">
         <Row label="Name" value={data.fullName} />
         <Row label="Service area" value={data.serviceArea} />
+        <Row label="State" value={data.state} />
         <Row label="Bio" value={data.bio || "—"} />
         <Separator />
         <Row label="Primary specialty" value={data.primarySpecialty} />

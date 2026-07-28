@@ -137,6 +137,7 @@ export type Database = {
           secondary_specialty_2: string | null
           service_area: string | null
           slug: string
+          state: string | null
           suspended_at: string | null
           updated_at: string
           user_id: string
@@ -161,6 +162,7 @@ export type Database = {
           secondary_specialty_2?: string | null
           service_area?: string | null
           slug: string
+          state?: string | null
           suspended_at?: string | null
           updated_at?: string
           user_id: string
@@ -185,6 +187,7 @@ export type Database = {
           secondary_specialty_2?: string | null
           service_area?: string | null
           slug?: string
+          state?: string | null
           suspended_at?: string | null
           updated_at?: string
           user_id?: string

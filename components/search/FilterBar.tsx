@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/lib/use-is-mobile";
 import { cn } from "@/lib/utils";
+import { US_STATES } from "@/lib/us-states";
 import type { Specialty } from "@/lib/types/database";
 
 const pillClass =
@@ -38,11 +39,11 @@ export function FilterBar({ specialties }: { specialties: Specialty[] }) {
   const isMobile = useIsMobile();
 
   const specialtySlug = searchParams.get("specialty") ?? "";
-  const location = searchParams.get("location") ?? "";
+  const state = searchParams.get("state") ?? "";
   const priceMin = searchParams.get("price_min") ?? "";
   const priceMax = searchParams.get("price_max") ?? "";
   const available = searchParams.get("available") === "true";
-  const hasAnyFilter = Boolean(specialtySlug || location || priceMin || priceMax || available);
+  const hasAnyFilter = Boolean(specialtySlug || state || priceMin || priceMax || available);
 
   const selectedSpecialtyName = specialties.find((s) => s.slug === specialtySlug)?.name;
 
@@ -103,10 +104,10 @@ export function FilterBar({ specialties }: { specialties: Specialty[] }) {
           )}
         </DropdownPill>
 
-        <LocationPill
-          location={location}
+        <StatePill
+          state={state}
           isMobile={isMobile}
-          onApply={(value) => updateParams({ location: value || null })}
+          onApply={(value) => updateParams({ state: value || null })}
         />
 
         <PricePill
@@ -173,46 +174,40 @@ function DropdownPill({
   );
 }
 
-function LocationPill({
-  location,
+function StatePill({
+  state,
   isMobile,
   onApply,
 }: {
-  location: string;
+  state: string;
   isMobile: boolean | null;
   onApply: (value: string) => void;
 }) {
-  const [draft, setDraft] = useState(location);
-
   return (
     <DropdownPill
-      label={location || "Location ▾"}
-      active={Boolean(location)}
-      title="Location"
+      label={state ? `${state} ✓` : "State ▾"}
+      active={Boolean(state)}
+      title="State"
       isMobile={isMobile}
     >
       {(close) => (
-        <div className="flex flex-col gap-2">
-          <Input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="e.g. Utah County"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                onApply(draft);
+        <div className="flex max-h-64 flex-col gap-1 overflow-y-auto">
+          {US_STATES.map((s) => (
+            <button
+              key={s}
+              type="button"
+              className={cn(
+                "rounded-md px-2 py-1.5 text-left text-sm hover:bg-black/5",
+                state === s && "font-semibold",
+              )}
+              onClick={() => {
+                onApply(state === s ? "" : s);
                 close();
-              }
-            }}
-          />
-          <Button
-            size="sm"
-            onClick={() => {
-              onApply(draft);
-              close();
-            }}
-          >
-            Apply
-          </Button>
+              }}
+            >
+              {s}
+            </button>
+          ))}
         </div>
       )}
     </DropdownPill>

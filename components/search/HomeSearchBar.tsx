@@ -2,7 +2,6 @@
 
 import { useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -11,22 +10,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { US_STATES } from "@/lib/us-states";
 import type { Specialty } from "@/lib/types/database";
 
 export function HomeSearchBar({ specialties }: { specialties: Specialty[] }) {
   const router = useRouter();
   const [specialty, setSpecialty] = useState("any");
-  const [location, setLocation] = useState("");
+  const [state, setState] = useState("any");
 
   const specialtyItems = {
     any: "Any specialty",
     ...Object.fromEntries(specialties.map((s) => [s.slug, s.name])),
   };
 
+  const stateItems = {
+    any: "Any state",
+    ...Object.fromEntries(US_STATES.map((s) => [s, s])),
+  };
+
   function handleSearch() {
     const params = new URLSearchParams();
     if (specialty !== "any") params.set("specialty", specialty);
-    if (location) params.set("location", location);
+    if (state !== "any") params.set("state", state);
     router.push(`/search${params.toString() ? `?${params.toString()}` : ""}`);
   }
 
@@ -80,14 +85,24 @@ export function HomeSearchBar({ specialties }: { specialties: Specialty[] }) {
         </div>
 
         <div className="flex flex-1 flex-col text-left">
-          <label style={labelStyle}>Location</label>
-          <Input
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="e.g. Utah County"
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            style={fieldStyle}
-          />
+          <label style={labelStyle}>State</label>
+          <Select
+            items={stateItems}
+            value={state}
+            onValueChange={(value: string | null) => setState(value ?? "any")}
+          >
+            <SelectTrigger className="w-full" style={fieldStyle}>
+              <SelectValue placeholder="Any state" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="any">Any state</SelectItem>
+              {US_STATES.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

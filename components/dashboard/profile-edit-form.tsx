@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Specialty } from "@/lib/types/database";
+import { US_STATES } from "@/lib/us-states";
 
 const BIO_MAX = 300;
 
@@ -43,6 +44,7 @@ type FormData = {
   avatarUrl: string | null;
   bio: string;
   serviceArea: string;
+  state: string;
   primarySpecialty: string;
   secondarySpecialty1: string;
   secondarySpecialty2: string;
@@ -167,6 +169,7 @@ export function ProfileEditForm({
         .update({
           bio: data.bio || null,
           service_area: data.serviceArea || null,
+          state: data.state || null,
           primary_specialty: data.primarySpecialty,
           secondary_specialty_1: data.secondarySpecialty1 || null,
           secondary_specialty_2: data.secondarySpecialty2 || null,
@@ -293,6 +296,24 @@ export function ProfileEditForm({
             value={data.serviceArea}
             onChange={(e) => update({ serviceArea: e.target.value })}
           />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label>State</Label>
+          <Select
+            value={data.state}
+            onValueChange={(value: string | null) => update({ state: value ?? "" })}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a state" />
+            </SelectTrigger>
+            <SelectContent>
+              {US_STATES.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </section>
 
