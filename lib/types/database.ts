@@ -138,6 +138,10 @@ export type Database = {
           service_area: string | null
           slug: string
           state: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_period_end: string | null
+          subscription_status: string
           suspended_at: string | null
           updated_at: string
           user_id: string
@@ -163,6 +167,10 @@ export type Database = {
           service_area?: string | null
           slug: string
           state?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_period_end?: string | null
+          subscription_status?: string
           suspended_at?: string | null
           updated_at?: string
           user_id: string
@@ -188,6 +196,10 @@ export type Database = {
           service_area?: string | null
           slug?: string
           state?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_period_end?: string | null
+          subscription_status?: string
           suspended_at?: string | null
           updated_at?: string
           user_id?: string
