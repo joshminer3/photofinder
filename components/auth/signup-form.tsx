@@ -23,7 +23,7 @@ const ROLE_INFO: Record<Role, { icon: typeof Search; name: string; description: 
   },
   photographer: {
     icon: Camera,
-    name: "I'm a photographer",
+    name: "I'm a photographer/videographer",
     description: "Create a profile and get found by clients",
   },
 };
