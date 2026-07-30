@@ -17,27 +17,27 @@ export function LogoMark({ className }: { className?: string }) {
         strokeLinejoin="round"
       />
       <path
-        d="M48 8 L62 8 L62 22"
+        d="M40 8 L54 8 L54 22"
         stroke="currentColor"
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
-        d="M8 48 L8 62 L22 62"
+        d="M8 40 L8 54 L22 54"
         stroke="currentColor"
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
-        d="M48 62 L62 62 L62 48"
+        d="M40 54 L54 54 L54 40"
         stroke="currentColor"
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx="35" cy="35" r="6" fill="currentColor" />
+      <circle cx="31" cy="31" r="6" fill="currentColor" />
     </svg>
   );
 }

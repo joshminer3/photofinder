@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "@/components/ui/sonner";
+import { AgentBubble } from "@/components/agent/AgentBubble";
 import { navHistoryBaselineScript } from "@/lib/nav-history";
 import "./globals.css";
 
@@ -39,6 +40,7 @@ export default function RootLayout({
         {children}
         <Toaster />
         <Analytics />
+        <AgentBubble />
       </body>
     </html>
   );
