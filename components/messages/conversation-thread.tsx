@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ArrowLeft, ExternalLink, Send } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useSmartBack } from "@/lib/hooks/use-smart-back";
 import type { Message } from "@/lib/types/database";
 
 const MAX_LENGTH = 2000;
@@ -66,6 +67,7 @@ export function ConversationThread({
   initialMessages: Message[];
 }) {
   const router = useRouter();
+  const goBack = useSmartBack("/messages");
   const [messages, setMessages] = useState<LocalMessage[]>(initialMessages);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
@@ -206,7 +208,7 @@ export function ConversationThread({
       >
         <button
           type="button"
-          onClick={() => router.push("/messages")}
+          onClick={goBack}
           className="flex shrink-0 items-center"
           style={{ gap: "4px", fontSize: "12px", color: "#7A7572" }}
         >
@@ -216,21 +218,46 @@ export function ConversationThread({
 
         <div style={{ width: "0.5px", height: "16px", background: "#DAD4CC" }} />
 
-        <Avatar name={otherName} avatarUrl={otherAvatarUrl} size={36} />
-
-        <div className="min-w-0 flex-1">
-          <p
-            className="truncate"
-            style={{ fontSize: "14px", fontWeight: 500, color: "#111010", letterSpacing: "-0.3px" }}
+        {otherSlug ? (
+          <button
+            type="button"
+            onClick={() => router.push(`/photographer/${otherSlug}`)}
+            className="flex min-w-0 flex-1 items-center text-left transition-opacity hover:opacity-70"
+            style={{ gap: "10px" }}
           >
-            {otherName}
-          </p>
-          {otherMeta && (
-            <p className="truncate" style={{ fontSize: "11px", color: "#7A7572" }}>
-              {otherMeta}
-            </p>
-          )}
-        </div>
+            <Avatar name={otherName} avatarUrl={otherAvatarUrl} size={36} />
+            <div className="min-w-0 flex-1">
+              <p
+                className="truncate"
+                style={{ fontSize: "14px", fontWeight: 500, color: "#111010", letterSpacing: "-0.3px" }}
+              >
+                {otherName}
+              </p>
+              {otherMeta && (
+                <p className="truncate" style={{ fontSize: "11px", color: "#7A7572" }}>
+                  {otherMeta}
+                </p>
+              )}
+            </div>
+          </button>
+        ) : (
+          <>
+            <Avatar name={otherName} avatarUrl={otherAvatarUrl} size={36} />
+            <div className="min-w-0 flex-1">
+              <p
+                className="truncate"
+                style={{ fontSize: "14px", fontWeight: 500, color: "#111010", letterSpacing: "-0.3px" }}
+              >
+                {otherName}
+              </p>
+              {otherMeta && (
+                <p className="truncate" style={{ fontSize: "11px", color: "#7A7572" }}>
+                  {otherMeta}
+                </p>
+              )}
+            </div>
+          </>
+        )}
 
         {otherSlug && (
           <button
