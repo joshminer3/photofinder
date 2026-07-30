@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { AtSign, Globe, Link2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { BackButton } from "@/components/photographer/back-button";
 import { SaveButton } from "@/components/photographer/save-button";
 import { MessageButton } from "@/components/photographer/message-button";
 import { ContactReviewsCard } from "@/components/photographer/contact-reviews-card";
@@ -140,6 +141,8 @@ export default async function PhotographerProfilePage({
   return (
     <div style={{ background: "#FDFCFB" }} className="min-h-[calc(100vh-4rem)]">
       <div className="mx-auto max-w-[760px]" style={{ padding: "28px 24px 48px" }}>
+        <BackButton />
+
         {/* Hero */}
         <div
           className="relative h-[180px] w-full sm:h-[220px]"
