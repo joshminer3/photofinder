@@ -13,6 +13,7 @@ import {
 } from "@/components/photographer/portfolio-grid";
 import type { ReviewWithReviewer } from "@/components/reviews/reviews-column";
 import { ReportModal } from "@/components/reports/report-modal";
+import type { PhotographerLink } from "@/lib/types/database";
 
 const REVIEWS_PAGE_SIZE = 2;
 
@@ -134,8 +135,13 @@ export default async function PhotographerProfilePage({
     ? `From $${photographer.price_range_min}`
     : null;
 
+  const additionalLinks = (photographer.additional_links as PhotographerLink[] | null) ?? [];
+
   const hasSocialLinks = Boolean(
-    photographer.instagram_url || photographer.website_url || photographer.other_link_url,
+    photographer.instagram_url ||
+      photographer.website_url ||
+      photographer.other_link_url ||
+      additionalLinks.length > 0,
   );
 
   return (
@@ -311,6 +317,26 @@ export default async function PhotographerProfilePage({
                 {photographer.other_link_label || "Link"}
               </a>
             )}
+            {additionalLinks.map((link, i) => (
+              <a
+                key={i}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center rounded-[6px] border bg-white"
+                style={{
+                  height: "28px",
+                  borderColor: "#E6E2DD",
+                  color: "#4C4845",
+                  fontSize: "11px",
+                  padding: "0 10px",
+                  gap: "5px",
+                }}
+              >
+                <Link2 size={13} />
+                {link.label || "Link"}
+              </a>
+            ))}
           </div>
         )}
 

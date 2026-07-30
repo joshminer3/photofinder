@@ -119,6 +119,7 @@ export type Database = {
       }
       photographer_profiles: {
         Row: {
+          additional_links: Json
           available_this_month: boolean
           bio: string | null
           created_at: string
@@ -148,6 +149,7 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          additional_links?: Json
           available_this_month?: boolean
           bio?: string | null
           created_at?: string
@@ -177,6 +179,7 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          additional_links?: Json
           available_this_month?: boolean
           bio?: string | null
           created_at?: string
@@ -573,8 +576,16 @@ export const Constants = {
 } as const
 
 export type Profile = Tables<"profiles">;
-export type PhotographerProfile = Tables<"photographer_profiles">;
 export type Specialty = Tables<"specialties">;
+
+export type PhotographerLink = { label: string; url: string };
+
+export type PhotographerProfile = Omit<
+  Tables<"photographer_profiles">,
+  "additional_links"
+> & {
+  additional_links: PhotographerLink[];
+};
 
 export type PortfolioItem = Omit<Tables<"portfolio_items">, "type"> & {
   type: "photo" | "video";

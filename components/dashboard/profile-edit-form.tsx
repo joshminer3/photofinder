@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { X, Film } from "lucide-react";
+import { X, Film, Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { MAX_PHOTOS, MAX_VIDEOS } from "@/lib/portfolio";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Specialty } from "@/lib/types/database";
+import type { PhotographerLink, Specialty } from "@/lib/types/database";
 import { US_STATES } from "@/lib/us-states";
 
 const BIO_MAX = 300;
@@ -55,6 +55,7 @@ type FormData = {
   websiteUrl: string;
   otherLinkUrl: string;
   otherLinkLabel: string;
+  additionalLinks: PhotographerLink[];
   publicEmail: string;
   publicPhone: string;
   portfolioItems: ExistingPortfolioItem[];
@@ -96,6 +97,29 @@ export function ProfileEditForm({
 
   function update(patch: Partial<FormData>) {
     setData((prev) => ({ ...prev, ...patch }));
+  }
+
+  function addLink() {
+    setData((prev) => ({
+      ...prev,
+      additionalLinks: [...prev.additionalLinks, { label: "", url: "" }],
+    }));
+  }
+
+  function updateLink(index: number, patch: Partial<PhotographerLink>) {
+    setData((prev) => ({
+      ...prev,
+      additionalLinks: prev.additionalLinks.map((link, i) =>
+        i === index ? { ...link, ...patch } : link,
+      ),
+    }));
+  }
+
+  function removeLink(index: number) {
+    setData((prev) => ({
+      ...prev,
+      additionalLinks: prev.additionalLinks.filter((_, i) => i !== index),
+    }));
   }
 
   const remainingExisting = data.portfolioItems.filter((i) => !deletedIds.has(i.id));
@@ -180,6 +204,7 @@ export function ProfileEditForm({
           website_url: data.websiteUrl || null,
           other_link_url: data.otherLinkUrl || null,
           other_link_label: data.otherLinkLabel || null,
+          additional_links: data.additionalLinks.filter((l) => l.url.trim()),
           public_email: data.publicEmail || null,
           public_phone: data.publicPhone || null,
           // A previously-rejected photographer resubmits by editing and
@@ -542,6 +567,44 @@ export function ProfileEditForm({
             />
           </div>
         </div>
+
+        {data.additionalLinks.map((link, index) => (
+          <div key={index} className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor={`additionalLinkLabel-${index}`}>Link label</Label>
+              <Input
+                id={`additionalLinkLabel-${index}`}
+                value={link.label}
+                onChange={(e) => updateLink(index, { label: e.target.value })}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor={`additionalLinkUrl-${index}`}>Link URL</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id={`additionalLinkUrl-${index}`}
+                  value={link.url}
+                  onChange={(e) => updateLink(index, { url: e.target.value })}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => removeLink(index)}
+                  aria-label="Remove link"
+                >
+                  <X className="size-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <Button type="button" variant="outline" size="sm" onClick={addLink} className="self-start">
+          <Plus className="size-4" />
+          Add another link
+        </Button>
+
         <div className="flex flex-col gap-2">
           <Label htmlFor="publicEmail">Public email</Label>
           <Input

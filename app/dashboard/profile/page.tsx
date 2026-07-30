@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { ProfileEditForm } from "@/components/dashboard/profile-edit-form";
 import { ViewProfileButton } from "@/components/dashboard/view-profile-button";
+import type { PhotographerLink } from "@/lib/types/database";
 
 export default async function DashboardProfilePage() {
   const supabase = await createClient();
@@ -76,6 +77,7 @@ export default async function DashboardProfilePage() {
             websiteUrl: photographer.website_url ?? "",
             otherLinkUrl: photographer.other_link_url ?? "",
             otherLinkLabel: photographer.other_link_label ?? "",
+            additionalLinks: (photographer.additional_links as PhotographerLink[]) ?? [],
             publicEmail: photographer.public_email ?? "",
             publicPhone: photographer.public_phone ?? "",
             portfolioItems,
