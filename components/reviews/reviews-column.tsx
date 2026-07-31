@@ -29,19 +29,21 @@ function Stars({ rating, size = 14 }: { rating: number; size?: number }) {
 export function ReviewsColumn({
   photographerId,
   photographerName,
+  slug,
+  isLoggedIn,
   initialReviews,
   totalCount,
   avgRating,
-  currentUserId,
   isOwnProfile,
   hasExistingReview,
 }: {
   photographerId: string;
   photographerName: string;
+  slug: string;
+  isLoggedIn: boolean;
   initialReviews: ReviewWithReviewer[];
   totalCount: number;
   avgRating: number;
-  currentUserId: string | null;
   isOwnProfile: boolean;
   hasExistingReview: boolean;
 }) {
@@ -72,7 +74,7 @@ export function ReviewsColumn({
     setLoading(false);
   }
 
-  const canReview = Boolean(currentUserId) && !isOwnProfile && !hasExistingReview;
+  const canReview = !isOwnProfile && !hasExistingReview;
 
   return (
     <div>
@@ -102,6 +104,8 @@ export function ReviewsColumn({
             <ReviewModal
               photographerId={photographerId}
               photographerName={photographerName}
+              slug={slug}
+              isLoggedIn={isLoggedIn}
               existingReview={null}
             />
           </div>

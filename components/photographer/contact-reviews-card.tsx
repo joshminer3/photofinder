@@ -36,7 +36,6 @@ export function ContactReviewsCard({
   reviews,
   totalCount,
   avgRating,
-  currentUserId,
   isOwnProfile,
   hasExistingReview,
 }: {
@@ -49,13 +48,12 @@ export function ContactReviewsCard({
   reviews: ReviewWithReviewer[];
   totalCount: number;
   avgRating: number;
-  currentUserId: string | null;
   isOwnProfile: boolean;
   hasExistingReview: boolean;
 }) {
   const hasReviews = totalCount > 0;
   const hasContact = Boolean(email || phone);
-  const canReview = Boolean(currentUserId) && !isOwnProfile && !hasExistingReview;
+  const canReview = !isOwnProfile && !hasExistingReview;
   const showReviewsSide = hasReviews || canReview;
 
   return (
@@ -118,10 +116,11 @@ export function ContactReviewsCard({
           <ReviewsColumn
             photographerId={photographerId}
             photographerName={photographerName}
+            slug={slug}
+            isLoggedIn={isLoggedIn}
             initialReviews={reviews}
             totalCount={totalCount}
             avgRating={avgRating}
-            currentUserId={currentUserId}
             isOwnProfile={isOwnProfile}
             hasExistingReview={hasExistingReview}
           />
@@ -143,6 +142,8 @@ export function ContactReviewsCard({
               <ReviewModal
                 photographerId={photographerId}
                 photographerName={photographerName}
+                slug={slug}
+                isLoggedIn={isLoggedIn}
                 existingReview={null}
               />
             </div>

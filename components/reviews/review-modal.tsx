@@ -20,10 +20,14 @@ const MAX_LENGTH = 1000;
 export function ReviewModal({
   photographerId,
   photographerName,
+  slug,
+  isLoggedIn,
   existingReview,
 }: {
   photographerId: string;
   photographerName: string;
+  slug: string;
+  isLoggedIn: boolean;
   existingReview: { rating: number; content: string } | null;
 }) {
   const router = useRouter();
@@ -33,6 +37,14 @@ export function ReviewModal({
   const [submitting, setSubmitting] = useState(false);
 
   const isValid = rating >= 1 && rating <= 5 && content.trim().length >= MIN_LENGTH;
+
+  function handleTriggerClick() {
+    if (!isLoggedIn) {
+      router.push(`/login?redirect=${encodeURIComponent(`/photographer/${slug}`)}`);
+      return;
+    }
+    setOpen(true);
+  }
 
   async function handleSubmit() {
     if (!isValid) return;
@@ -65,7 +77,7 @@ export function ReviewModal({
     <Dialog open={open} onOpenChange={setOpen}>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={handleTriggerClick}
         className="shrink-0 rounded-[6px] border bg-white"
         style={{
           height: "26px",

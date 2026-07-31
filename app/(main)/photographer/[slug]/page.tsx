@@ -356,7 +356,6 @@ export default async function PhotographerProfilePage({
           reviews={reviews}
           totalCount={reviewCount}
           avgRating={avgRating}
-          currentUserId={user?.id ?? null}
           isOwnProfile={user?.id === photographer.user_id}
           hasExistingReview={hasExistingReview}
         />
