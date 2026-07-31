@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getRatingsByPhotographerId } from "@/lib/reviews";
-import { getCoverImagesByPhotographerId } from "@/lib/portfolio-covers";
+import { getPortfolioImagesByPhotographerId } from "@/lib/portfolio-covers";
 import { FilterBar } from "@/components/search/FilterBar";
 import { SortPills } from "@/components/search/SortPills";
 import { SearchListCard, type SearchListCardData } from "@/components/search/SearchListCard";
@@ -54,9 +54,9 @@ export default async function SearchPage({
   const { data: results } = await query;
   const photographerIds = (results ?? []).map((r) => r.id);
 
-  const [ratings, covers] = await Promise.all([
+  const [ratings, images] = await Promise.all([
     getRatingsByPhotographerId(photographerIds),
-    getCoverImagesByPhotographerId(photographerIds),
+    getPortfolioImagesByPhotographerId(photographerIds, 5),
   ]);
 
   const photographers: SearchListCardData[] = (results ?? []).map((r) => ({
@@ -69,7 +69,7 @@ export default async function SearchPage({
     serviceArea: r.service_area,
     priceRangeMin: r.price_range_min,
     availableThisMonth: r.available_this_month,
-    coverUrl: covers.get(r.id) ?? null,
+    images: images.get(r.id) ?? [],
     avgRating: ratings.get(r.id)?.avgRating ?? null,
     reviewCount: ratings.get(r.id)?.reviewCount ?? 0,
   }));

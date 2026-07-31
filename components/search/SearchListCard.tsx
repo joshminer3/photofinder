@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export type SearchListCardData = {
   photographerId: string;
@@ -15,7 +16,7 @@ export type SearchListCardData = {
   serviceArea: string | null;
   priceRangeMin: number | null;
   availableThisMonth: boolean;
-  coverUrl: string | null;
+  images: string[];
   avgRating: number | null;
   reviewCount: number;
 };
@@ -29,7 +30,19 @@ export function SearchListCard({
 }) {
   const router = useRouter();
   const [messagePending, setMessagePending] = useState(false);
+  const [imageIndex, setImageIndex] = useState(0);
   const profileHref = `/photographer/${photographer.slug}`;
+  const hasMultipleImages = photographer.images.length > 1;
+
+  function handlePrevImage(e: React.MouseEvent) {
+    e.stopPropagation();
+    setImageIndex((i) => Math.max(0, i - 1));
+  }
+
+  function handleNextImage(e: React.MouseEvent) {
+    e.stopPropagation();
+    setImageIndex((i) => Math.min(photographer.images.length - 1, i + 1));
+  }
 
   async function handleMessage(e: React.MouseEvent) {
     e.stopPropagation();
@@ -95,32 +108,91 @@ export function SearchListCard({
           From ${photographer.priceRangeMin}
         </span>
       )}
-      <div
-        className="relative h-[180px] w-full shrink-0 sm:h-auto sm:w-[180px]"
-        style={{ minHeight: "160px", background: "#E6E2DD" }}
-      >
-        {photographer.coverUrl && (
-          <Image
-            src={photographer.coverUrl}
-            alt=""
-            fill
-            sizes="180px"
-            className="object-cover"
-          />
-        )}
-        {photographer.availableThisMonth && (
-          <span
-            className="absolute bottom-[10px] left-[10px] rounded-full backdrop-blur-[4px]"
-            style={{
-              background: "rgba(255,255,255,0.92)",
-              color: "#111010",
-              fontSize: "10px",
-              fontWeight: 500,
-              padding: "3px 8px",
-            }}
-          >
-            Available this month
-          </span>
+      <div className="flex w-full shrink-0 flex-col sm:w-[180px]">
+        <div
+          className="relative h-[180px] w-full sm:h-auto sm:flex-1"
+          style={{ minHeight: "160px", background: "#E6E2DD" }}
+        >
+          {photographer.images.map((url, i) => (
+            <Image
+              key={url}
+              src={url}
+              alt=""
+              fill
+              sizes="180px"
+              loading={i === imageIndex ? "eager" : "lazy"}
+              className="object-cover"
+              style={{ opacity: i === imageIndex ? 1 : 0 }}
+            />
+          ))}
+
+          {hasMultipleImages && imageIndex > 0 && (
+            <button
+              type="button"
+              onClick={handlePrevImage}
+              aria-label="Previous image"
+              className="absolute flex items-center justify-center rounded-full backdrop-blur-[4px]"
+              style={{
+                top: "50%",
+                left: "6px",
+                transform: "translateY(-50%)",
+                width: "22px",
+                height: "22px",
+                background: "rgba(255,255,255,0.85)",
+              }}
+            >
+              <ChevronLeft size={13} color="#111010" />
+            </button>
+          )}
+          {hasMultipleImages && imageIndex < photographer.images.length - 1 && (
+            <button
+              type="button"
+              onClick={handleNextImage}
+              aria-label="Next image"
+              className="absolute flex items-center justify-center rounded-full backdrop-blur-[4px]"
+              style={{
+                top: "50%",
+                right: "6px",
+                transform: "translateY(-50%)",
+                width: "22px",
+                height: "22px",
+                background: "rgba(255,255,255,0.85)",
+              }}
+            >
+              <ChevronRight size={13} color="#111010" />
+            </button>
+          )}
+
+          {photographer.availableThisMonth && (
+            <span
+              className="absolute bottom-[10px] left-[10px] rounded-full backdrop-blur-[4px]"
+              style={{
+                background: "rgba(255,255,255,0.92)",
+                color: "#111010",
+                fontSize: "10px",
+                fontWeight: 500,
+                padding: "3px 8px",
+              }}
+            >
+              Available this month
+            </span>
+          )}
+        </div>
+
+        {hasMultipleImages && (
+          <div className="flex items-center justify-center" style={{ gap: "4px", padding: "6px 0" }}>
+            {photographer.images.map((url, i) => (
+              <span
+                key={url}
+                className="rounded-full"
+                style={{
+                  width: "5px",
+                  height: "5px",
+                  background: i === imageIndex ? "#111010" : "#E6E2DD",
+                }}
+              />
+            ))}
+          </div>
         )}
       </div>
 
