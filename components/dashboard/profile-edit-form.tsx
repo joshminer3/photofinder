@@ -2,8 +2,9 @@
 
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { X, Film, Plus } from "lucide-react";
+import { X, Film, Plus, Star } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 import { MAX_PHOTOS, MAX_VIDEOS } from "@/lib/portfolio";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,7 @@ import {
 import type { PhotographerLink, Specialty } from "@/lib/types/database";
 import { US_STATES } from "@/lib/us-states";
 
-const BIO_MAX = 300;
+const BIO_MAX = 500;
 
 type ExistingPortfolioItem = {
   id: string;
@@ -59,7 +60,10 @@ type FormData = {
   publicEmail: string;
   publicPhone: string;
   portfolioItems: ExistingPortfolioItem[];
+  coverPhotoId: string | null;
 };
+
+type CoverRef = { kind: "existing"; id: string } | { kind: "new"; localId: string };
 
 async function uploadFile(
   supabase: ReturnType<typeof createClient>,
@@ -90,6 +94,7 @@ export function ProfileEditForm({
   const [avatarPreview, setAvatarPreview] = useState(initialData.avatarUrl);
   const [newItems, setNewItems] = useState<NewPortfolioItem[]>([]);
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
+  const [coverRef, setCoverRef] = useState<CoverRef | null>(null);
   const [saving, setSaving] = useState(false);
 
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -165,11 +170,27 @@ export function ProfileEditForm({
       }
       return next;
     });
+    setCoverRef((prev) => (prev?.kind === "existing" && prev.id === id ? null : prev));
   }
 
   function removeNewItem(localId: string) {
     setNewItems((prev) => prev.filter((i) => i.localId !== localId));
+    setCoverRef((prev) => (prev?.kind === "new" && prev.localId === localId ? null : prev));
   }
+
+  function setCoverExisting(id: string) {
+    setCoverRef({ kind: "existing", id });
+  }
+
+  function setCoverNew(localId: string) {
+    setCoverRef({ kind: "new", localId });
+  }
+
+  // Falls back to whichever photo is currently first by display_order when
+  // the photographer hasn't explicitly picked a cover this session.
+  const effectiveCoverExistingId =
+    coverRef === null ? data.coverPhotoId : coverRef.kind === "existing" ? coverRef.id : null;
+  const effectiveCoverNewLocalId = coverRef?.kind === "new" ? coverRef.localId : null;
 
   async function handleSave() {
     setSaving(true);
@@ -230,6 +251,22 @@ export function ProfileEditForm({
         if (deleteRowsError) throw deleteRowsError;
       }
 
+      // A lower display_order wins the "cover photo" spot everywhere it's
+      // resolved (public profile, search cards, agent context) — promoting
+      // an existing photo just needs to push it below the current minimum,
+      // no need to renumber anything else.
+      const minOrder = Math.min(0, ...data.portfolioItems.map((i) => i.displayOrder));
+
+      if (coverRef?.kind === "existing" && !deletedIds.has(coverRef.id)) {
+        const { error: coverError } = await supabase
+          .from("portfolio_items")
+          .update({ display_order: minOrder - 1 })
+          .eq("id", coverRef.id);
+        if (coverError) throw coverError;
+      }
+
+      let insertedItems: ExistingPortfolioItem[] = [];
+
       if (newItems.length > 0) {
         const maxOrder = Math.max(
           -1,
@@ -238,27 +275,53 @@ export function ProfileEditForm({
         const uploaded = await Promise.all(
           newItems.map(async (item, index) => {
             const path = await uploadFile(supabase, userId, item.file, item.type);
+            const isCover = coverRef?.kind === "new" && coverRef.localId === item.localId;
             return {
               photographer_id: photographerId,
               storage_path: path,
               type: item.type,
-              display_order: maxOrder + 1 + index,
+              display_order: isCover ? minOrder - 1 : maxOrder + 1 + index,
             };
           }),
         );
-        const { error: insertError } = await supabase
+        const { data: insertedRows, error: insertError } = await supabase
           .from("portfolio_items")
-          .insert(uploaded);
+          .insert(uploaded)
+          .select("*");
         if (insertError) throw insertError;
+
+        insertedItems = (insertedRows ?? []).map((row) => ({
+          id: row.id,
+          type: row.type as "photo" | "video",
+          storagePath: row.storage_path,
+          displayOrder: row.display_order,
+          url: supabase.storage.from("portfolios").getPublicUrl(row.storage_path).data.publicUrl,
+        }));
       }
+
+      // Resolve the cover to a real, persisted portfolio_items id — either
+      // the existing photo that was promoted, or the row just created for a
+      // newly uploaded cover photo (matched by storage path, since insert
+      // order isn't guaranteed).
+      const newCoverItem =
+        coverRef?.kind === "new"
+          ? insertedItems.find((i) => i.displayOrder === minOrder - 1)
+          : undefined;
+      const nextCoverPhotoId =
+        coverRef?.kind === "existing" ? coverRef.id : (newCoverItem?.id ?? data.coverPhotoId);
 
       setData((prev) => ({
         ...prev,
         avatarUrl,
-        portfolioItems: prev.portfolioItems.filter((i) => !deletedIds.has(i.id)),
+        portfolioItems: [
+          ...prev.portfolioItems.filter((i) => !deletedIds.has(i.id)),
+          ...insertedItems,
+        ],
+        coverPhotoId: nextCoverPhotoId,
       }));
       setDeletedIds(new Set());
       setNewItems([]);
+      setCoverRef(null);
       setAvatarFile(null);
       toast("Profile updated.");
     } catch {
@@ -309,6 +372,7 @@ export function ProfileEditForm({
             maxLength={BIO_MAX}
             value={data.bio}
             onChange={(e) => update({ bio: e.target.value })}
+            placeholder="Share your experience, specialties, and the kind of work you love to shoot..."
           />
           <span className="self-end text-xs text-muted-foreground">
             {data.bio.length}/{BIO_MAX}
@@ -475,23 +539,31 @@ export function ProfileEditForm({
             >
               Add photos
             </Button>
-            <input
-              ref={photoInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => {
-                addFiles(e.target.files, "photo");
-                e.target.value = "";
-              }}
-            />
           </div>
+          <p className="text-xs text-muted-foreground">
+            Hover a photo and click the star to set it as your profile&apos;s
+            cover image.
+          </p>
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={(e) => {
+              addFiles(e.target.files, "photo");
+              e.target.value = "";
+            }}
+          />
           <PortfolioMediaGrid
             existing={remainingExisting.filter((i) => i.type === "photo")}
             newItems={newItems.filter((i) => i.type === "photo")}
             onDeleteExisting={toggleDelete}
             onRemoveNew={removeNewItem}
+            coverExistingId={effectiveCoverExistingId}
+            coverNewLocalId={effectiveCoverNewLocalId}
+            onSetCoverExisting={setCoverExisting}
+            onSetCoverNew={setCoverNew}
           />
         </div>
 
@@ -649,11 +721,19 @@ function PortfolioMediaGrid({
   newItems,
   onDeleteExisting,
   onRemoveNew,
+  coverExistingId,
+  coverNewLocalId,
+  onSetCoverExisting,
+  onSetCoverNew,
 }: {
   existing: ExistingPortfolioItem[];
   newItems: NewPortfolioItem[];
   onDeleteExisting: (id: string) => void;
   onRemoveNew: (localId: string) => void;
+  coverExistingId?: string | null;
+  coverNewLocalId?: string | null;
+  onSetCoverExisting?: (id: string) => void;
+  onSetCoverNew?: (localId: string) => void;
 }) {
   if (existing.length === 0 && newItems.length === 0) {
     return (
@@ -665,52 +745,88 @@ function PortfolioMediaGrid({
 
   return (
     <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-      {existing.map((item) => (
-        <div
-          key={item.id}
-          className="group relative aspect-square overflow-hidden rounded-lg border bg-muted"
-        >
-          {item.type === "photo" ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={item.url} alt="" className="size-full object-cover" />
-          ) : (
-            <div className="flex size-full items-center justify-center bg-muted">
-              <Film className="size-8 text-muted-foreground" />
-            </div>
-          )}
-          <button
-            type="button"
-            onClick={() => onDeleteExisting(item.id)}
-            className="absolute top-1 right-1 rounded-full bg-black/60 p-1 text-white opacity-0 group-hover:opacity-100"
-            aria-label="Delete"
+      {existing.map((item) => {
+        const isCover = item.type === "photo" && item.id === coverExistingId;
+        return (
+          <div
+            key={item.id}
+            className="group relative aspect-square overflow-hidden rounded-lg border bg-muted"
           >
-            <X className="size-3" />
-          </button>
-        </div>
-      ))}
-      {newItems.map((item) => (
-        <div
-          key={item.localId}
-          className="group relative aspect-square overflow-hidden rounded-lg border-2 border-primary/50 bg-muted"
-        >
-          {item.type === "photo" ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={item.previewUrl} alt="" className="size-full object-cover" />
-          ) : (
-            <div className="flex size-full items-center justify-center bg-muted">
-              <Film className="size-8 text-muted-foreground" />
-            </div>
-          )}
-          <button
-            type="button"
-            onClick={() => onRemoveNew(item.localId)}
-            className="absolute top-1 right-1 rounded-full bg-black/60 p-1 text-white opacity-0 group-hover:opacity-100"
-            aria-label="Remove"
+            {item.type === "photo" ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={item.url} alt="" className="size-full object-cover" />
+            ) : (
+              <div className="flex size-full items-center justify-center bg-muted">
+                <Film className="size-8 text-muted-foreground" />
+              </div>
+            )}
+            {onSetCoverExisting && item.type === "photo" && (
+              <button
+                type="button"
+                onClick={() => onSetCoverExisting(item.id)}
+                className="absolute top-1 left-1 rounded-full bg-black/60 p-1 text-white opacity-0 group-hover:opacity-100"
+                aria-label="Set as cover photo"
+              >
+                <Star className={cn("size-3", isCover && "fill-current")} />
+              </button>
+            )}
+            {isCover && (
+              <span className="absolute bottom-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[9px] font-medium text-white">
+                Cover
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => onDeleteExisting(item.id)}
+              className="absolute top-1 right-1 rounded-full bg-black/60 p-1 text-white opacity-0 group-hover:opacity-100"
+              aria-label="Delete"
+            >
+              <X className="size-3" />
+            </button>
+          </div>
+        );
+      })}
+      {newItems.map((item) => {
+        const isCover = item.type === "photo" && item.localId === coverNewLocalId;
+        return (
+          <div
+            key={item.localId}
+            className="group relative aspect-square overflow-hidden rounded-lg border-2 border-primary/50 bg-muted"
           >
-            <X className="size-3" />
-          </button>
-        </div>
-      ))}
+            {item.type === "photo" ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={item.previewUrl} alt="" className="size-full object-cover" />
+            ) : (
+              <div className="flex size-full items-center justify-center bg-muted">
+                <Film className="size-8 text-muted-foreground" />
+              </div>
+            )}
+            {onSetCoverNew && item.type === "photo" && (
+              <button
+                type="button"
+                onClick={() => onSetCoverNew(item.localId)}
+                className="absolute top-1 left-1 rounded-full bg-black/60 p-1 text-white opacity-0 group-hover:opacity-100"
+                aria-label="Set as cover photo"
+              >
+                <Star className={cn("size-3", isCover && "fill-current")} />
+              </button>
+            )}
+            {isCover && (
+              <span className="absolute bottom-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[9px] font-medium text-white">
+                Cover
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => onRemoveNew(item.localId)}
+              className="absolute top-1 right-1 rounded-full bg-black/60 p-1 text-white opacity-0 group-hover:opacity-100"
+              aria-label="Remove"
+            >
+              <X className="size-3" />
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }

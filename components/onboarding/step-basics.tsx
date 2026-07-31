@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { US_STATES } from "@/lib/us-states";
 
-const BIO_MAX = 300;
+const BIO_MAX = 500;
 
 export function StepBasics() {
   const { data, update } = useOnboarding();
@@ -68,14 +68,14 @@ export function StepBasics() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="bio">Short bio</Label>
+        <Label htmlFor="bio">Bio</Label>
         <Textarea
           id="bio"
           rows={4}
           maxLength={BIO_MAX}
           value={data.bio}
           onChange={(e) => update({ bio: e.target.value })}
-          placeholder="Tell clients what makes your work unique..."
+          placeholder="Share your experience, specialties, and the kind of work you love to shoot..."
         />
         <span className="self-end text-xs" style={{ color: "#B8B3AE" }}>
           {data.bio.length}/{BIO_MAX}

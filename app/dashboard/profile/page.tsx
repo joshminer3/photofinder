@@ -42,6 +42,10 @@ export default async function DashboardProfilePage() {
       .publicUrl,
   }));
 
+  // portfolioItems is already ordered by display_order ascending, so the
+  // first photo in it is the one currently used as the profile cover image.
+  const coverPhotoId = portfolioItems.find((i) => i.type === "photo")?.id ?? null;
+
   return (
     <div style={{ padding: "24px" }}>
       <div className="flex items-center justify-between" style={{ marginBottom: "20px" }}>
@@ -81,6 +85,7 @@ export default async function DashboardProfilePage() {
             publicEmail: photographer.public_email ?? "",
             publicPhone: photographer.public_phone ?? "",
             portfolioItems,
+            coverPhotoId,
           }}
         />
       </div>

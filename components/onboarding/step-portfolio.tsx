@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { X, GripVertical, Film } from "lucide-react";
+import { X, GripVertical, Film, Star } from "lucide-react";
 import {
   MAX_PHOTOS,
   MAX_VIDEOS,
@@ -59,13 +59,22 @@ export function StepPortfolio() {
     update({ portfolioItems: items });
   }
 
+  function setCover(localId: string) {
+    const target = data.portfolioItems.find((i) => i.localId === localId);
+    if (!target) return;
+    update({
+      portfolioItems: [target, ...data.portfolioItems.filter((i) => i.localId !== localId)],
+    });
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h2 className="text-xl font-semibold">Your portfolio</h2>
         <p className="text-sm text-muted-foreground">
-          Up to {MAX_PHOTOS} photos and {MAX_VIDEOS} videos. Drag to reorder —
-          the first photo becomes your profile&apos;s cover image.
+          Up to {MAX_PHOTOS} photos and {MAX_VIDEOS} videos. Hover a photo and
+          click the star to set it as your profile&apos;s cover image (or
+          drag to reorder).
         </p>
       </div>
 
@@ -99,6 +108,8 @@ export function StepPortfolio() {
           onReorder={reorder}
           dragIndex={dragIndex}
           setDragIndex={setDragIndex}
+          coverLocalId={photos[0]?.localId ?? null}
+          onSetCover={setCover}
         />
       </div>
 
@@ -144,12 +155,16 @@ function MediaGrid({
   onReorder,
   dragIndex,
   setDragIndex,
+  coverLocalId,
+  onSetCover,
 }: {
   items: PortfolioDraftItem[];
   onRemove: (localId: string) => void;
   onReorder: (fromLocalId: string, toLocalId: string) => void;
   dragIndex: number | null;
   setDragIndex: (i: number | null) => void;
+  coverLocalId?: string | null;
+  onSetCover?: (localId: string) => void;
 }) {
   if (items.length === 0) {
     return (
@@ -191,7 +206,21 @@ function MediaGrid({
             </div>
           )}
           <div className="absolute inset-x-0 top-0 flex items-center justify-between bg-gradient-to-b from-black/50 to-transparent p-1 opacity-0 group-hover:opacity-100">
-            <GripVertical className="size-4 text-white" />
+            <div className="flex items-center gap-1">
+              <GripVertical className="size-4 text-white" />
+              {onSetCover && item.type === "photo" && (
+                <button
+                  type="button"
+                  onClick={() => onSetCover(item.localId)}
+                  className="rounded-full bg-black/60 p-1 text-white"
+                  aria-label="Set as cover photo"
+                >
+                  <Star
+                    className={cn("size-3", item.localId === coverLocalId && "fill-current")}
+                  />
+                </button>
+              )}
+            </div>
             <button
               type="button"
               onClick={() => onRemove(item.localId)}
@@ -201,6 +230,11 @@ function MediaGrid({
               <X className="size-3" />
             </button>
           </div>
+          {item.localId === coverLocalId && (
+            <span className="absolute bottom-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[9px] font-medium text-white">
+              Cover
+            </span>
+          )}
         </div>
       ))}
     </div>
