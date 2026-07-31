@@ -29,7 +29,7 @@ export default async function HomePage() {
           className="mx-auto max-w-[480px]"
           style={{ fontWeight: 400, fontSize: "15px", color: "var(--brand-text-muted)" }}
         >
-          Foto connects clients in Utah with photographers by specialty,
+          Foto connects clients with photographers by specialty,
           location, price, and availability.
         </p>
 
