@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+
+const SWIPE_THRESHOLD_PX = 40;
 
 export type SearchListCardData = {
   photographerId: string;
@@ -33,6 +35,8 @@ export function SearchListCard({
   const [imageIndex, setImageIndex] = useState(0);
   const profileHref = `/photographer/${photographer.slug}`;
   const hasMultipleImages = photographer.images.length > 1;
+  const touchStartX = useRef<number | null>(null);
+  const didSwipeRef = useRef(false);
 
   function handlePrevImage(e: React.MouseEvent) {
     e.stopPropagation();
@@ -42,6 +46,34 @@ export function SearchListCard({
   function handleNextImage(e: React.MouseEvent) {
     e.stopPropagation();
     setImageIndex((i) => Math.min(photographer.images.length - 1, i + 1));
+  }
+
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(deltaX) < SWIPE_THRESHOLD_PX) return;
+
+    // Swiped far enough — treat this as a carousel gesture, not a tap, so
+    // the card's onClick (navigate to profile) that follows should no-op.
+    didSwipeRef.current = true;
+    if (deltaX < 0) {
+      setImageIndex((i) => Math.min(photographer.images.length - 1, i + 1));
+    } else {
+      setImageIndex((i) => Math.max(0, i - 1));
+    }
+  }
+
+  function handleCardClick() {
+    if (didSwipeRef.current) {
+      didSwipeRef.current = false;
+      return;
+    }
+    router.push(profileHref);
   }
 
   async function handleMessage(e: React.MouseEvent) {
@@ -86,7 +118,7 @@ export function SearchListCard({
 
   return (
     <div
-      onClick={() => router.push(profileHref)}
+      onClick={handleCardClick}
       className="relative flex cursor-pointer flex-col overflow-hidden rounded-[10px] border transition-shadow hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] sm:flex-row"
       style={{ borderColor: "#E6E2DD", background: "#FFFFFF" }}
     >
@@ -111,7 +143,9 @@ export function SearchListCard({
       <div className="flex w-full shrink-0 flex-col sm:w-[180px]">
         <div
           className="relative h-[180px] w-full sm:h-auto sm:flex-1"
-          style={{ minHeight: "160px", background: "#E6E2DD" }}
+          style={{ minHeight: "160px", background: "#E6E2DD", touchAction: "pan-y" }}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
           {photographer.images.map((url, i) => (
             <Image
@@ -136,12 +170,12 @@ export function SearchListCard({
                 top: "50%",
                 left: "6px",
                 transform: "translateY(-50%)",
-                width: "22px",
-                height: "22px",
+                width: "28px",
+                height: "28px",
                 background: "rgba(255,255,255,0.85)",
               }}
             >
-              <ChevronLeft size={13} color="#111010" />
+              <ChevronLeft size={16} color="#111010" />
             </button>
           )}
           {hasMultipleImages && imageIndex < photographer.images.length - 1 && (
@@ -154,12 +188,12 @@ export function SearchListCard({
                 top: "50%",
                 right: "6px",
                 transform: "translateY(-50%)",
-                width: "22px",
-                height: "22px",
+                width: "28px",
+                height: "28px",
                 background: "rgba(255,255,255,0.85)",
               }}
             >
-              <ChevronRight size={13} color="#111010" />
+              <ChevronRight size={16} color="#111010" />
             </button>
           )}
 
