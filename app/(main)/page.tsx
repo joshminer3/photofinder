@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { HomeSearchBar } from "@/components/search/HomeSearchBar";
-import { NearbyPhotographers } from "@/components/home/nearby-photographers";
+import { PhotoDiscoveryGrid } from "@/components/home/photo-discovery-grid";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -52,7 +52,7 @@ export default async function HomePage() {
 
       <div style={{ borderTop: "1px solid var(--brand-border)" }} />
 
-      <NearbyPhotographers />
+      <PhotoDiscoveryGrid />
     </div>
   );
 }
