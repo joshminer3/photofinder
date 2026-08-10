@@ -36,21 +36,21 @@ export function PortfolioGrid({ items }: { items: PortfolioMedia[] }) {
 
   return (
     <div className="flex flex-col" style={{ gap: "6px" }}>
-      <div className="grid grid-cols-3" style={{ gap: "6px" }}>
+      <div className="columns-3 max-[640px]:columns-2" style={{ columnGap: "6px" }}>
         {photos.map((item, index) => (
           <button
             key={item.id}
             type="button"
             onClick={() => setLightboxIndex(index)}
-            className="relative overflow-hidden border-none p-0"
-            style={{ aspectRatio: "1", borderRadius: "6px", background: "#E6E2DD", cursor: "pointer" }}
+            className="relative block w-full break-inside-avoid overflow-hidden border-none p-0"
+            style={{ borderRadius: "6px", background: "#E6E2DD", cursor: "pointer", marginBottom: "6px" }}
           >
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element -- natural, unknown aspect ratio drives the masonry layout; next/image needs known width+height. */}
+            <img
               src={item.url}
               alt=""
-              fill
-              sizes="(max-width: 640px) 33vw, 240px"
-              className="object-cover"
+              loading="lazy"
+              style={{ width: "100%", height: "auto", display: "block" }}
             />
           </button>
         ))}
