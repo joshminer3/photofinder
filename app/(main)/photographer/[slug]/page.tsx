@@ -53,17 +53,18 @@ export async function generateMetadata({
   const result = await getPhotographer(slug);
   if (!result) return {};
 
-  const { photographer, media } = result;
+  const { photographer } = result;
   const name = photographer.profiles?.full_name ?? "Photographer";
   const description = photographer.bio
     ? photographer.bio.slice(0, 160)
     : `${name} — ${photographer.primary_specialty} photographer in ${photographer.service_area ?? "Utah"}.`;
-  const ogImage = media.find((m) => m.type === "photo")?.url;
 
   return {
     title: `${name} — ${photographer.primary_specialty} Photographer in ${photographer.service_area ?? "Utah"} | Foto`,
     description,
-    openGraph: ogImage ? { images: [ogImage] } : undefined,
+    // No per-photographer openGraph.images override — share links use the
+    // site-wide Foto logo (app/opengraph-image.png) instead of a random
+    // portfolio photo.
   };
 }
 

@@ -18,6 +18,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  // Required for the app/opengraph-image.png and app/twitter-image.png file
+  // conventions to resolve to an absolute URL — without this, Next.js
+  // defaults to http://localhost:3000, which breaks link previews in
+  // production.
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
   title: "Foto — Find your photographer",
   description:
     "Foto is a photographer discovery marketplace for Utah. Find and contact photographers filtered by specialty, location, price, and availability.",
